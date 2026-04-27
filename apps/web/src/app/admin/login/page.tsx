@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,7 +14,6 @@ export default function LoginPage() {
 }
 
 function LoginForm() {
-  const router = useRouter();
   const search = useSearchParams();
   const next = search.get('next') ?? '/admin/dashboard';
   const [email, setEmail] = useState('admin@jenosize.test');
@@ -36,11 +35,13 @@ function LoginForm() {
         const data = await res.json().catch(() => ({}));
         throw new Error(data?.error ?? 'Login failed');
       }
-      router.push(next);
-      router.refresh();
+      // Full page navigation so the just-set httpOnly cookie is included in
+      // the next request — router.push() is a client-side soft-nav and the
+      // middleware sometimes runs before the browser commits Set-Cookie,
+      // bouncing the user back to /login on the first attempt.
+      window.location.assign(next);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
-    } finally {
       setLoading(false);
     }
   }
