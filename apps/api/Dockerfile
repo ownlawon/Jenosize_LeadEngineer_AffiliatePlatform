@@ -34,7 +34,21 @@ RUN echo "=== node_modules/.bin (api) ===" \
  && /app/apps/api/node_modules/.bin/tsc --version
 
 RUN pnpm --filter @jenosize/api db:generate
-RUN pnpm --filter @jenosize/api build
+
+# Diagnostics: confirm src + tsconfig are present in the build context
+RUN echo "=== api/src/ ===" \
+ && ls -la /app/apps/api/src/ | head -10 \
+ && echo "=== api/ root ===" \
+ && ls -la /app/apps/api/ | head -20
+
+# Compile via tsc directly (sidesteps any nest-CLI quirks like deleteOutDir
+# silently skipping emit in some Railpack/Metal builder edge cases) and
+# stream tsc's --listEmittedFiles so the build log proves compilation ran.
+RUN cd /app/apps/api \
+ && ./node_modules/.bin/tsc -p tsconfig.build.json --listEmittedFiles \
+ && echo "=== dist/ after tsc ===" \
+ && ls -la /app/apps/api/dist/ | head -20
+
 RUN test -f /app/apps/api/dist/main.js && echo "Build OK: $(ls -la /app/apps/api/dist/main.js)"
 
 # --- Runner ---
