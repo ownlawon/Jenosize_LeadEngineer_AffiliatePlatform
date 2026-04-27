@@ -106,7 +106,7 @@
 
 | Step | Action | Expected |
 |------|--------|---------|
-| 1 | Set end date earlier than start | Server returns 400 with message "endAt must be after startAt" |
+| 1 | Set end date earlier than start | Form blocks submit with inline error "End date must be after start date" (client guard); if forced via API, server returns 400 with the same human-readable message |
 
 ### TC-3.3 · Validation: invalid UTM characters
 

@@ -13,7 +13,7 @@ export class CampaignsService {
     const startAt = new Date(dto.startAt);
     const endAt = new Date(dto.endAt);
     if (endAt <= startAt) {
-      throw new BadRequestException('endAt must be after startAt');
+      throw new BadRequestException('End date must be after start date');
     }
     const c = await this.prisma.campaign.create({
       data: {

@@ -18,6 +18,13 @@ export default function CreateCampaignForm() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
+    // Client-side guard so the user gets feedback before a round-trip.
+    if (new Date(endAt) <= new Date(startAt)) {
+      setError('End date must be after start date');
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await fetch('/api/campaigns', {
@@ -32,7 +39,8 @@ export default function CreateCampaignForm() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data?.message ?? data?.error ?? 'Failed to create');
+        const raw = data?.message ?? data?.error ?? 'Failed to create';
+        throw new Error(Array.isArray(raw) ? raw.join(', ') : String(raw));
       }
       router.refresh();
     } catch (e) {
@@ -74,6 +82,7 @@ export default function CreateCampaignForm() {
         <input
           type="date"
           value={endAt}
+          min={startAt}
           onChange={(e) => setEnd(e.target.value)}
           className="input"
           required
