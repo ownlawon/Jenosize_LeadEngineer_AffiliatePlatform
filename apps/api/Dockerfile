@@ -6,13 +6,18 @@ RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
 
 WORKDIR /app
 
+# NODE_ENV=production at build time would make pnpm skip devDependencies,
+# stripping @nestjs/cli + TypeScript and breaking `nest build`. Pin to
+# development for the builder stage; the runner stage flips it back.
+ENV NODE_ENV=development
+
 # Copy workspace manifests for layer-cached install
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml* ./
 COPY apps/api/package.json ./apps/api/
 COPY packages/adapters/package.json ./packages/adapters/
 COPY packages/shared/package.json ./packages/shared/
 
-RUN pnpm install --frozen-lockfile=false
+RUN pnpm install --frozen-lockfile=false --prod=false
 
 # Copy source
 COPY apps/api ./apps/api

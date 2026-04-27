@@ -4,11 +4,14 @@ RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
 
 WORKDIR /app
 
+# Force devDeps so tailwind/postcss/typescript are present for `next build`
+ENV NODE_ENV=development
+
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml* ./
 COPY apps/web/package.json ./apps/web/
 COPY packages/shared/package.json ./packages/shared/
 
-RUN pnpm install --frozen-lockfile=false
+RUN pnpm install --frozen-lockfile=false --prod=false
 
 COPY apps/web ./apps/web
 COPY packages/shared ./packages/shared
