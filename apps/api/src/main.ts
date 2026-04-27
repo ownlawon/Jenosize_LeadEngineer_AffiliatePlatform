@@ -33,7 +33,10 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api/docs', app, document);
 
-  const port = Number(process.env.API_PORT ?? 3001);
+  // Railway / Heroku-style platforms inject PORT; honour that first, then
+  // fall back to API_PORT (local override) and finally to 3001 for dev.
+  const portRaw = process.env.PORT || process.env.API_PORT || '3001';
+  const port = Number(portRaw) || 3001;
   await app.listen(port, '0.0.0.0');
   Logger.log(`API listening on http://localhost:${port} (docs: /api/docs)`, 'Bootstrap');
 }
