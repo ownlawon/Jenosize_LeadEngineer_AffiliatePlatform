@@ -1,0 +1,60 @@
+{
+  "LAZADA": {
+    "matcha-001": {
+      "externalId": "matcha-001",
+      "title": "Premium Ceremonial Grade Matcha Powder 100g",
+      "imageUrl": "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?w=600&h=600&fit=crop",
+      "storeName": "Matcha Official Store",
+      "price": 459,
+      "currency": "THB",
+      "url": "https://www.lazada.co.th/products/matcha-001.html"
+    },
+    "yoga-mat-77": {
+      "externalId": "yoga-mat-77",
+      "title": "Eco-Friendly Yoga Mat 6mm Non-Slip",
+      "imageUrl": "https://images.unsplash.com/photo-1591291621164-2c6367723315?w=600&h=600&fit=crop",
+      "storeName": "FitLife Store",
+      "price": 690,
+      "currency": "THB",
+      "url": "https://www.lazada.co.th/products/yoga-mat-77.html"
+    },
+    "wireless-earbuds-x9": {
+      "externalId": "wireless-earbuds-x9",
+      "title": "Wireless Bluetooth Earbuds X9 Pro",
+      "imageUrl": "https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46?w=600&h=600&fit=crop",
+      "storeName": "Audio Hub Official",
+      "price": 1290,
+      "currency": "THB",
+      "url": "https://www.lazada.co.th/products/wireless-earbuds-x9.html"
+    }
+  },
+  "SHOPEE": {
+    "matcha-001": {
+      "externalId": "matcha-001",
+      "title": "Premium Ceremonial Grade Matcha Powder 100g",
+      "imageUrl": "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?w=600&h=600&fit=crop",
+      "storeName": "Matcha Thailand",
+      "price": 425,
+      "currency": "THB",
+      "url": "https://shopee.co.th/product/123456/matcha-001"
+    },
+    "yoga-mat-77": {
+      "externalId": "yoga-mat-77",
+      "title": "Eco-Friendly Yoga Mat 6mm Non-Slip",
+      "imageUrl": "https://images.unsplash.com/photo-1591291621164-2c6367723315?w=600&h=600&fit=crop",
+      "storeName": "Yoga Lover TH",
+      "price": 720,
+      "currency": "THB",
+      "url": "https://shopee.co.th/product/123456/yoga-mat-77"
+    },
+    "wireless-earbuds-x9": {
+      "externalId": "wireless-earbuds-x9",
+      "title": "Wireless Bluetooth Earbuds X9 Pro",
+      "imageUrl": "https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46?w=600&h=600&fit=crop",
+      "storeName": "Gadget Shop SHP",
+      "price": 1199,
+      "currency": "THB",
+      "url": "https://shopee.co.th/product/123456/wireless-earbuds-x9"
+    }
+  }
+}

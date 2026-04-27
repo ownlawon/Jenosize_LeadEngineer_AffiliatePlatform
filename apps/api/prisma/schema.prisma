@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Marketplace {
+  LAZADA
+  SHOPEE
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+}
+
+model Product {
+  id        String   @id @default(cuid())
+  title     String
+  imageUrl  String
+  createdAt DateTime @default(now())
+  offers    Offer[]
+  links     Link[]
+}
+
+model Offer {
+  id            String      @id @default(cuid())
+  productId     String
+  product       Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  marketplace   Marketplace
+  storeName     String
+  price         Decimal     @db.Decimal(12, 2)
+  currency      String      @default("THB")
+  externalUrl   String
+  externalId    String
+  lastCheckedAt DateTime    @default(now())
+
+  @@unique([productId, marketplace])
+  @@index([marketplace])
+}
+
+model Campaign {
+  id          String   @id @default(cuid())
+  name        String
+  utmSource   String   @default("jenosize")
+  utmMedium   String   @default("affiliate")
+  utmCampaign String
+  startAt     DateTime
+  endAt       DateTime
+  createdAt   DateTime @default(now())
+  links       Link[]
+
+  @@index([startAt, endAt])
+}
+
+model Link {
+  id          String      @id @default(cuid())
+  productId   String
+  product     Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  campaignId  String
+  campaign    Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  marketplace Marketplace
+  shortCode   String      @unique
+  targetUrl   String
+  createdAt   DateTime    @default(now())
+  clicks      Click[]
+
+  @@unique([productId, campaignId, marketplace])
+}
+
+model Click {
+  id        String   @id @default(cuid())
+  linkId    String
+  link      Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  timestamp DateTime @default(now())
+  referrer  String?
+  userAgent String?
+  ipHash    String?
+
+  @@index([linkId, timestamp])
+  @@index([timestamp])
+}

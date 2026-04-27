@@ -1,0 +1,23 @@
+node_modules/
+dist/
+build/
+.next/
+coverage/
+.env
+.env.local
+.env.*.local
+*.log
+.DS_Store
+.turbo/
+.cache/
+*.tsbuildinfo
+
+# Prisma generated client
+apps/api/src/generated/
+
+# IDE
+.vscode/
+.idea/
+
+# Assignment brief (not part of the deliverable)
+Test Assignment*.pdf

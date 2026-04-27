@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: jenosize
+          POSTGRES_PASSWORD: jenosize
+          POSTGRES_DB: jenosize
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U jenosize"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://jenosize:jenosize@localhost:5432/jenosize?schema=public
+      REDIS_URL: redis://localhost:6379
+      JWT_SECRET: ci-test-secret-must-be-long-enough
+      ADMIN_EMAIL: admin@jenosize.test
+      ADMIN_PASSWORD: ChangeMe!2025
+      SHORT_LINK_BASE_URL: http://localhost:3001
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile=false
+
+      - name: Generate Prisma client
+        run: pnpm --filter @jenosize/api db:generate
+
+      - name: Apply migrations
+        run: pnpm --filter @jenosize/api exec prisma migrate deploy
+
+      - name: Typecheck
+        run: pnpm -r typecheck
+
+      - name: Unit tests
+        run: pnpm -r test
+
+      - name: E2E tests (api)
+        run: pnpm --filter @jenosize/api test:e2e
+
+      - name: Build
+        run: pnpm -r build
