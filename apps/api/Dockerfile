@@ -20,7 +20,9 @@ COPY packages/adapters ./packages/adapters
 COPY packages/shared ./packages/shared
 
 RUN pnpm --filter @jenosize/api db:generate \
- && pnpm --filter @jenosize/api build
+ && pnpm --filter @jenosize/api build \
+ && test -f /app/apps/api/dist/main.js \
+ && echo "Build OK: $(ls -la /app/apps/api/dist/main.js)"
 
 # --- Runner ---
 FROM node:20-bookworm-slim AS runner
@@ -43,5 +45,7 @@ COPY --from=builder /app/packages ./packages
 EXPOSE 3001
 WORKDIR /app/apps/api
 
-# Run prisma migrations on boot, then start server
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
+# Run prisma migrations on boot, then start server.
+# `ls` runs first so the deploy log shows whether dist/main.js exists when the
+# container starts — surfaces missing-build issues without a silent crash loop.
+CMD ["sh", "-c", "ls -la dist/ || true; npx prisma migrate deploy && node dist/main.js"]
