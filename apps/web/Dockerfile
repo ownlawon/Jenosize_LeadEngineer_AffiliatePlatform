@@ -1,5 +1,5 @@
 # --- Builder ---
-FROM node:20-bookworm-slim AS builder
+FROM node:25-bookworm-slim AS builder
 RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
 
 WORKDIR /app
@@ -25,7 +25,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN pnpm --filter @jenosize/web build
 
 # --- Runner ---
-FROM node:20-bookworm-slim AS runner
+FROM node:25-bookworm-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
