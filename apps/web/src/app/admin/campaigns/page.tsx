@@ -1,12 +1,16 @@
 import Link from 'next/link';
 import { apiFetch } from '@/lib/api';
-import type { CampaignDto } from '@jenosize/shared';
+import type { CampaignDto, Paginated } from '@jenosize/shared';
 import CreateCampaignForm from './CreateCampaignForm';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminCampaignsPage() {
-  const campaigns = await apiFetch<CampaignDto[]>('/api/campaigns', { authed: true });
+  const data = await apiFetch<Paginated<CampaignDto>>(
+    '/api/campaigns?pageSize=50',
+    { authed: true },
+  );
+  const campaigns = data.items;
 
   return (
     <div className="space-y-8">

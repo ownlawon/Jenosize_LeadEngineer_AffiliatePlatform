@@ -1,14 +1,15 @@
 import Link from 'next/link';
 import Nav from '@/components/Nav';
 import { apiFetch, isAuthenticated } from '@/lib/api';
-import type { CampaignDto } from '@jenosize/shared';
+import type { CampaignDto, Paginated } from '@jenosize/shared';
 
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
   let campaigns: CampaignDto[] = [];
   try {
-    campaigns = await apiFetch<CampaignDto[]>('/api/campaigns');
+    const data = await apiFetch<Paginated<CampaignDto>>('/api/campaigns?pageSize=50');
+    campaigns = data.items;
   } catch {
     campaigns = [];
   }

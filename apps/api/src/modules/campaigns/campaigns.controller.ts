@@ -1,7 +1,8 @@
-import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { PaginationQueryDto } from '../../common/pagination.dto';
 import { CampaignsService } from './campaigns.service';
 import { CreateCampaignDto } from './dto';
 
@@ -19,9 +20,9 @@ export class CampaignsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'List campaigns (public)' })
-  findAll() {
-    return this.campaigns.findAll();
+  @ApiOperation({ summary: 'List campaigns (paginated, public)' })
+  findAll(@Query() q: PaginationQueryDto) {
+    return this.campaigns.findAll(q.page, q.pageSize);
   }
 
   @Get(':id')

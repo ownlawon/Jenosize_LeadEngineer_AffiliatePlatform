@@ -5,6 +5,7 @@ import { Marketplace } from '@prisma/client';
 
 import { LinkDto } from '@jenosize/shared';
 import { PrismaService } from '../../prisma/prisma.service';
+import { PaginatedResult, buildPaginated } from '../../common/pagination.dto';
 import { CreateLinkDto } from './dto';
 
 // Confusable-free alphabet (no 0/O/1/l/I) — keeps 6 chars unambiguous when
@@ -69,12 +70,18 @@ export class LinksService {
     return this.toDto({ ...link, clickCount: 0 });
   }
 
-  async findAll(): Promise<LinkDto[]> {
-    const links = await this.prisma.link.findMany({
-      include: { _count: { select: { clicks: true } } },
-      orderBy: { createdAt: 'desc' },
-    });
-    return links.map((l) => this.toDto({ ...l, clickCount: l._count.clicks }));
+  async findAll(page = 1, pageSize = 20): Promise<PaginatedResult<LinkDto>> {
+    const [total, links] = await this.prisma.$transaction([
+      this.prisma.link.count(),
+      this.prisma.link.findMany({
+        include: { _count: { select: { clicks: true } } },
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+    ]);
+    const items = links.map((l) => this.toDto({ ...l, clickCount: l._count.clicks }));
+    return buildPaginated(items, total, page, pageSize);
   }
 
   toDto(l: {

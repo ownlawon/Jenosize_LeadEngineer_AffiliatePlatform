@@ -3,6 +3,7 @@ import { Campaign } from '@prisma/client';
 
 import { CampaignDto } from '@jenosize/shared';
 import { PrismaService } from '../../prisma/prisma.service';
+import { PaginatedResult, buildPaginated } from '../../common/pagination.dto';
 import { CreateCampaignDto } from './dto';
 
 @Injectable()
@@ -28,9 +29,16 @@ export class CampaignsService {
     return this.toDto(c);
   }
 
-  async findAll(): Promise<CampaignDto[]> {
-    const list = await this.prisma.campaign.findMany({ orderBy: { createdAt: 'desc' } });
-    return list.map((c) => this.toDto(c));
+  async findAll(page = 1, pageSize = 20): Promise<PaginatedResult<CampaignDto>> {
+    const [total, list] = await this.prisma.$transaction([
+      this.prisma.campaign.count(),
+      this.prisma.campaign.findMany({
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+    ]);
+    return buildPaginated(list.map((c) => this.toDto(c)), total, page, pageSize);
   }
 
   async findOne(id: string): Promise<CampaignDto & { links: unknown[] }> {

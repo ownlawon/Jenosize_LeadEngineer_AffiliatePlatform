@@ -3,6 +3,15 @@ import { z } from 'zod';
 export const MarketplaceSchema = z.enum(['LAZADA', 'SHOPEE']);
 export type Marketplace = z.infer<typeof MarketplaceSchema>;
 
+// --- Pagination ---
+export interface Paginated<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  pageCount: number;
+}
+
 // --- Auth ---
 export const LoginSchema = z.object({
   email: z.string().email(),

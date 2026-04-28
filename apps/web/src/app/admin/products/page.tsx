@@ -1,11 +1,15 @@
 import { apiFetch } from '@/lib/api';
-import type { ProductDto } from '@jenosize/shared';
+import type { Paginated, ProductDto } from '@jenosize/shared';
 import AddProductForm from './AddProductForm';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminProductsPage() {
-  const products = await apiFetch<ProductDto[]>('/api/products', { authed: true });
+  const data = await apiFetch<Paginated<ProductDto>>(
+    '/api/products?pageSize=50',
+    { authed: true },
+  );
+  const products = data.items;
 
   return (
     <div className="space-y-8">

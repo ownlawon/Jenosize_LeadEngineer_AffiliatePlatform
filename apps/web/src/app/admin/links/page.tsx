@@ -1,5 +1,5 @@
 import { apiFetch } from '@/lib/api';
-import type { CampaignDto, LinkDto, ProductDto } from '@jenosize/shared';
+import type { CampaignDto, LinkDto, Paginated, ProductDto } from '@jenosize/shared';
 import GenerateLinkForm from './GenerateLinkForm';
 import LinksTable from './LinksTable';
 
@@ -7,9 +7,9 @@ export const dynamic = 'force-dynamic';
 
 export default async function AdminLinksPage() {
   const [products, campaigns, links] = await Promise.all([
-    apiFetch<ProductDto[]>('/api/products', { authed: true }),
-    apiFetch<CampaignDto[]>('/api/campaigns', { authed: true }),
-    apiFetch<LinkDto[]>('/api/links', { authed: true }),
+    apiFetch<Paginated<ProductDto>>('/api/products?pageSize=100', { authed: true }),
+    apiFetch<Paginated<CampaignDto>>('/api/campaigns?pageSize=100', { authed: true }),
+    apiFetch<Paginated<LinkDto>>('/api/links?pageSize=100', { authed: true }),
   ]);
 
   return (
@@ -21,9 +21,9 @@ export default async function AdminLinksPage() {
         </p>
       </div>
 
-      <GenerateLinkForm products={products} campaigns={campaigns} />
+      <GenerateLinkForm products={products.items} campaigns={campaigns.items} />
 
-      <LinksTable links={links} />
+      <LinksTable links={links.items} />
     </div>
   );
 }

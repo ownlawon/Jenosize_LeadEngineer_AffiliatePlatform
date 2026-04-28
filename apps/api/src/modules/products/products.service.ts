@@ -5,6 +5,7 @@ import { AdapterError, detectMarketplace, getAdapter } from '@jenosize/adapters'
 import { OfferDto, ProductDto } from '@jenosize/shared';
 
 import { PrismaService } from '../../prisma/prisma.service';
+import { PaginatedResult, buildPaginated } from '../../common/pagination.dto';
 
 @Injectable()
 export class ProductsService {
@@ -84,12 +85,21 @@ export class ProductsService {
     return existing?.id ?? null;
   }
 
-  async findAll(): Promise<ProductDto[]> {
-    const products = await this.prisma.product.findMany({
-      include: { offers: true },
-      orderBy: { createdAt: 'desc' },
-    });
-    return products.map((p) => this.toProductDto(p, p.offers));
+  async findAll(
+    page = 1,
+    pageSize = 20,
+  ): Promise<PaginatedResult<ProductDto>> {
+    const [total, products] = await this.prisma.$transaction([
+      this.prisma.product.count(),
+      this.prisma.product.findMany({
+        include: { offers: true },
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+    ]);
+    const items = products.map((p) => this.toProductDto(p, p.offers));
+    return buildPaginated(items, total, page, pageSize);
   }
 
   async findOne(id: string): Promise<ProductDto> {

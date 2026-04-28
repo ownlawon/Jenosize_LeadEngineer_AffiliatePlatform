@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { PaginationQueryDto } from '../../common/pagination.dto';
 import { LinksService } from './links.service';
 import { CreateLinkDto } from './dto';
 
@@ -19,8 +20,8 @@ export class LinksController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'List all links with click counts' })
-  findAll() {
-    return this.links.findAll();
+  @ApiOperation({ summary: 'List links (paginated, with click counts)' })
+  findAll(@Query() q: PaginationQueryDto) {
+    return this.links.findAll(q.page, q.pageSize);
   }
 }
