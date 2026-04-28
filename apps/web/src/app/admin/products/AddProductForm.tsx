@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { cn } from '@/lib/cn';
 
 type Sample = {
   url: string;
@@ -103,9 +104,10 @@ export default function AddProductForm({ existingOfferKeys = [] }: AddProductFor
         <div className="mb-2 flex items-baseline justify-between">
           <p className="text-xs uppercase tracking-wide text-slate-500">Quick samples</p>
           <span className="text-[11px] text-slate-400">
-            <span className="mr-1 text-emerald-700">✓</span>= already in the
-            catalogue (click to refresh price). Hover any button for the URL it
-            submits.
+            <span className="mr-0.5 inline-block rounded border border-emerald-300 bg-emerald-100 px-1 text-emerald-800">✓ added</span>
+            <span className="mx-1">vs</span>
+            <span className="mr-0.5 inline-block rounded border border-slate-200 bg-white px-1 text-slate-700">white</span>
+            = ready to add
           </span>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -122,20 +124,87 @@ export default function AddProductForm({ existingOfferKeys = [] }: AddProductFor
                     ? `${s.url}\n\nAlready in the catalogue — clicking will refresh the price.`
                     : s.url
                 }
-                className={`btn-outline text-xs ${
-                  added ? 'border-emerald-200 bg-emerald-50/40 text-emerald-700' : ''
-                }`}
+                className={cn(
+                  'inline-flex items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium transition-all',
+                  'disabled:cursor-not-allowed disabled:opacity-60',
+                  added
+                    ? 'border-emerald-300 bg-emerald-100 text-emerald-800 hover:bg-emerald-200/80'
+                    : 'border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300 hover:bg-slate-50',
+                )}
               >
                 {added && (
-                  <span aria-hidden className="mr-1 inline-block text-[10px]">
-                    ✓
-                  </span>
+                  <span aria-hidden className="text-[11px] leading-none">✓</span>
                 )}
                 {s.label}
               </button>
             );
           })}
         </div>
+
+        <details className="mt-4 group rounded-md border border-slate-200 bg-slate-50/50 text-xs text-slate-600">
+          <summary className="flex cursor-pointer list-none select-none items-center gap-2 px-3 py-2 font-medium text-slate-700 [&::-webkit-details-marker]:hidden">
+            <span>Or paste a URL by hand</span>
+            <span className="text-slate-400 group-open:hidden">— show 12 sample URLs</span>
+            <span className="ml-auto text-slate-400 group-open:hidden">▾</span>
+            <span className="ml-auto hidden text-slate-400 group-open:inline">▴</span>
+          </summary>
+          <div className="border-t border-slate-200 p-3 space-y-2">
+            <p className="text-[11px] leading-relaxed text-slate-500">
+              Copy any URL below into the input above and click{' '}
+              <span className="font-medium text-slate-700">Add product</span>.
+              Same effect as clicking the matching Quick Sample button.
+            </p>
+            <ul className="space-y-1 font-mono text-[11px]">
+              {SAMPLES.map((s) => {
+                const added = existingSet.has(`${s.externalId}|${s.marketplace}`);
+                return (
+                  <li
+                    key={s.url}
+                    className="flex items-center gap-2 rounded bg-white/60 px-2 py-1"
+                  >
+                    <span
+                      className={cn(
+                        'inline-block w-12 shrink-0 text-[10px] font-semibold uppercase tracking-wide',
+                        s.marketplace === 'LAZADA'
+                          ? 'text-orange-600'
+                          : 'text-rose-600',
+                      )}
+                    >
+                      {s.marketplace}
+                    </span>
+                    {added && (
+                      <span
+                        title="Already in the catalogue"
+                        className="text-[10px] text-emerald-600"
+                        aria-hidden
+                      >
+                        ✓
+                      </span>
+                    )}
+                    <span className="truncate text-slate-700" title={s.url}>
+                      {s.url}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={async (e) => {
+                        e.preventDefault();
+                        try {
+                          await navigator.clipboard.writeText(s.url);
+                          toast.success('URL copied');
+                        } catch {
+                          toast.error('Clipboard not available');
+                        }
+                      }}
+                      className="ml-auto rounded border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-medium text-slate-600 hover:bg-slate-50"
+                    >
+                      Copy
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </details>
       </div>
     </div>
   );
