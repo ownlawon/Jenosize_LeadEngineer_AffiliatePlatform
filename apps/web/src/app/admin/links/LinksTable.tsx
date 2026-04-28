@@ -60,14 +60,19 @@ export default function LinksTable({ links }: { links: LinkDto[] }) {
                       target="_blank"
                       rel="noopener noreferrer"
                       title={l.shortUrl}
-                      className="group inline-flex items-baseline gap-1 font-mono hover:underline"
+                      className="inline-flex items-center gap-2 hover:underline"
                     >
+                      <span className="font-mono text-base font-semibold text-brand-600">
+                        {path}
+                      </span>
                       {host && (
-                        <span className="text-xs text-slate-400 group-hover:text-slate-500">
-                          {host}
+                        <span
+                          className="hidden text-[11px] text-slate-400 sm:inline"
+                          aria-hidden
+                        >
+                          on {host}
                         </span>
                       )}
-                      <span className="text-brand-600">{path}</span>
                     </a>
                   </td>
                   <td className="px-4 py-3">{l.marketplace}</td>
