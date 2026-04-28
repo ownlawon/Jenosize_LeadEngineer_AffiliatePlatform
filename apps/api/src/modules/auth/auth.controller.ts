@@ -1,6 +1,7 @@
 import { Body, Controller, Get, HttpCode, Post, Res, UseGuards, Req } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
@@ -14,6 +15,9 @@ const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  // Tighter than the global limit: 5 login attempts/min/IP. Brute-force
+  // protection on top of bcrypt's per-attempt cost.
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
   @Post('login')
   @HttpCode(200)
   @ApiOperation({ summary: 'Authenticate admin user; sets httpOnly cookie' })

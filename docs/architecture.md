@@ -4,6 +4,73 @@ This document expands on the [README architecture overview](../README.md#archite
 
 ---
 
+## Data model (ER diagram)
+
+```mermaid
+erDiagram
+    USER {
+      string id PK
+      string email UK
+      string password "bcrypt hash"
+      datetime createdAt
+    }
+    PRODUCT {
+      string id PK
+      string title
+      string imageUrl
+      datetime createdAt
+    }
+    OFFER {
+      string id PK
+      string productId FK
+      enum   marketplace "LAZADA | SHOPEE"
+      string storeName
+      decimal price
+      string currency
+      string externalUrl
+      string externalId
+      datetime lastCheckedAt
+    }
+    CAMPAIGN {
+      string id PK
+      string name
+      string utmSource
+      string utmMedium
+      string utmCampaign
+      datetime startAt
+      datetime endAt
+    }
+    LINK {
+      string id PK
+      string productId FK
+      string campaignId FK
+      enum   marketplace
+      string shortCode UK
+      string targetUrl
+      datetime createdAt
+    }
+    CLICK {
+      string id PK
+      string linkId FK
+      datetime timestamp
+      string referrer
+      string userAgent
+      string ipHash "sha256(ip + salt)"
+    }
+
+    PRODUCT  ||--o{ OFFER : "has"
+    PRODUCT  ||--o{ LINK  : "promoted by"
+    CAMPAIGN ||--o{ LINK  : "groups"
+    LINK     ||--o{ CLICK : "tracked by"
+```
+
+> The unique `(productId, marketplace)` index on `Offer` and
+> `(productId, campaignId, marketplace)` on `Link` keep the model
+> idempotent: re-adding the same product or generating the same link
+> upserts in place instead of creating duplicates.
+
+---
+
 ## Module dependency graph
 
 ```mermaid

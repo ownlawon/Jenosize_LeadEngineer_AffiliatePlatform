@@ -48,6 +48,17 @@ export class RedisService implements OnModuleDestroy {
     }
   }
 
+  /** Lightweight liveness check. Returns false if Redis is unreachable. */
+  async ping(): Promise<boolean> {
+    if (!this.client) return false;
+    try {
+      const pong = await this.client.ping();
+      return pong === 'PONG';
+    } catch {
+      return false;
+    }
+  }
+
   async del(...keys: string[]): Promise<void> {
     if (!this.client || keys.length === 0) return;
     try {

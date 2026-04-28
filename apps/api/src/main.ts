@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -12,6 +13,16 @@ async function bootstrap() {
     },
   });
 
+  // Helmet sets sensible secure HTTP headers (X-Frame-Options, X-Content-Type-
+  // Options, Referrer-Policy, etc.). CSP is left off because the bundled
+  // Swagger UI uses inline scripts that a strict default policy would block —
+  // the assets the api itself ships are JSON, so CSP isn't load-bearing here.
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }),
+  );
   app.use(cookieParser());
 
   app.useGlobalPipes(
