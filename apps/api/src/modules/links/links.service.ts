@@ -7,8 +7,11 @@ import { LinkDto } from '@jenosize/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateLinkDto } from './dto';
 
+// Confusable-free alphabet (no 0/O/1/l/I) — keeps 6 chars unambiguous when
+// dictated/typed. 57^6 ≈ 3.4 × 10^10 possible codes, plenty of headroom for
+// the MVP scope; collisions are retried on insert.
 const SHORT_CODE_ALPHABET = 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-const generateShortCode = customAlphabet(SHORT_CODE_ALPHABET, 8);
+const generateShortCode = customAlphabet(SHORT_CODE_ALPHABET, 6);
 
 @Injectable()
 export class LinksService {
