@@ -13,6 +13,30 @@ const SAMPLES = [
     label: 'Lazada · Earbuds',
   },
   { url: 'https://shopee.co.th/product/123456/wireless-earbuds-x9', label: 'Shopee · Earbuds' },
+  {
+    url: 'https://www.lazada.co.th/products/coffee-beans-arabica.html',
+    label: 'Lazada · Coffee Beans',
+  },
+  {
+    url: 'https://shopee.co.th/product/123456/coffee-beans-arabica',
+    label: 'Shopee · Coffee Beans',
+  },
+  {
+    url: 'https://www.lazada.co.th/products/skincare-glow-set.html',
+    label: 'Lazada · Skincare Set',
+  },
+  {
+    url: 'https://shopee.co.th/product/123456/skincare-glow-set',
+    label: 'Shopee · Skincare Set',
+  },
+  {
+    url: 'https://www.lazada.co.th/products/mechanical-keyboard-75.html',
+    label: 'Lazada · Keyboard',
+  },
+  {
+    url: 'https://shopee.co.th/product/123456/mechanical-keyboard-75',
+    label: 'Shopee · Keyboard',
+  },
 ];
 
 export default function AddProductForm() {
@@ -50,8 +74,9 @@ export default function AddProductForm() {
       <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
         <strong className="font-semibold">Demo mode:</strong> the catalogue is
         backed by a mock adapter (per the assignment&apos;s allowance), so only
-        the three sample SKUs below resolve. Real Lazada/Shopee URLs would
-        work once the live affiliate adapter is wired up — see{' '}
+        the six sample SKUs in the Quick Samples below resolve. Real
+        Lazada/Shopee URLs would work once the live affiliate adapter is
+        wired up — see{' '}
         <code className="rounded bg-white/60 px-1 py-0.5">packages/adapters</code>.
       </div>
 

@@ -26,6 +26,33 @@
       "price": 1290,
       "currency": "THB",
       "url": "https://www.lazada.co.th/products/wireless-earbuds-x9.html"
+    },
+    "coffee-beans-arabica": {
+      "externalId": "coffee-beans-arabica",
+      "title": "Single-Origin Arabica Coffee Beans 250g",
+      "imageUrl": "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=600&h=600&fit=crop",
+      "storeName": "Roastery Direct",
+      "price": 380,
+      "currency": "THB",
+      "url": "https://www.lazada.co.th/products/coffee-beans-arabica.html"
+    },
+    "skincare-glow-set": {
+      "externalId": "skincare-glow-set",
+      "title": "Vitamin C Brightening Skincare Set (3 pcs)",
+      "imageUrl": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=600&h=600&fit=crop",
+      "storeName": "Glow Beauty Lazada",
+      "price": 890,
+      "currency": "THB",
+      "url": "https://www.lazada.co.th/products/skincare-glow-set.html"
+    },
+    "mechanical-keyboard-75": {
+      "externalId": "mechanical-keyboard-75",
+      "title": "75% Hot-Swap Mechanical Keyboard RGB",
+      "imageUrl": "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=600&h=600&fit=crop",
+      "storeName": "PC Gear Mall",
+      "price": 2890,
+      "currency": "THB",
+      "url": "https://www.lazada.co.th/products/mechanical-keyboard-75.html"
     }
   },
   "SHOPEE": {
@@ -55,6 +82,33 @@
       "price": 1199,
       "currency": "THB",
       "url": "https://shopee.co.th/product/123456/wireless-earbuds-x9"
+    },
+    "coffee-beans-arabica": {
+      "externalId": "coffee-beans-arabica",
+      "title": "Single-Origin Arabica Coffee Beans 250g",
+      "imageUrl": "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=600&h=600&fit=crop",
+      "storeName": "Coffee Bros Shopee",
+      "price": 359,
+      "currency": "THB",
+      "url": "https://shopee.co.th/product/123456/coffee-beans-arabica"
+    },
+    "skincare-glow-set": {
+      "externalId": "skincare-glow-set",
+      "title": "Vitamin C Brightening Skincare Set (3 pcs)",
+      "imageUrl": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=600&h=600&fit=crop",
+      "storeName": "K-Beauty Outlet",
+      "price": 829,
+      "currency": "THB",
+      "url": "https://shopee.co.th/product/123456/skincare-glow-set"
+    },
+    "mechanical-keyboard-75": {
+      "externalId": "mechanical-keyboard-75",
+      "title": "75% Hot-Swap Mechanical Keyboard RGB",
+      "imageUrl": "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=600&h=600&fit=crop",
+      "storeName": "Keyboard Lab TH",
+      "price": 2750,
+      "currency": "THB",
+      "url": "https://shopee.co.th/product/123456/mechanical-keyboard-75"
     }
   }
 }

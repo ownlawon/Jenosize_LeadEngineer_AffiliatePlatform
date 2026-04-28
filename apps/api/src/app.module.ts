@@ -13,6 +13,7 @@ import { LinksModule } from './modules/links/links.module';
 import { RedirectModule } from './modules/redirect/redirect.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { JobsModule } from './modules/jobs/jobs.module';
+import { BootstrapModule } from './modules/bootstrap/bootstrap.module';
 import { HealthController } from './modules/health/health.controller';
 
 @Module({
@@ -32,6 +33,7 @@ import { HealthController } from './modules/health/health.controller';
     RedirectModule,
     DashboardModule,
     JobsModule,
+    BootstrapModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

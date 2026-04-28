@@ -56,7 +56,14 @@ async function main() {
   await ensureAdmin();
 
   const productIds: string[] = [];
-  for (const externalId of ['matcha-001', 'yoga-mat-77', 'wireless-earbuds-x9']) {
+  for (const externalId of [
+    'matcha-001',
+    'yoga-mat-77',
+    'wireless-earbuds-x9',
+    'coffee-beans-arabica',
+    'skincare-glow-set',
+    'mechanical-keyboard-75',
+  ]) {
     const p1 = await ensureProductWithOffer(externalId, 'LAZADA');
     const p2 = await ensureProductWithOffer(externalId, 'SHOPEE');
     if (p1.id === p2.id) productIds.push(p1.id);
