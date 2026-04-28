@@ -23,7 +23,11 @@ export default async function AdminLinksPage() {
 
       <GenerateLinkForm products={products.items} campaigns={campaigns.items} />
 
-      <LinksTable links={links.items} />
+      <LinksTable
+        links={links.items}
+        products={products.items}
+        campaigns={campaigns.items}
+      />
     </div>
   );
 }
