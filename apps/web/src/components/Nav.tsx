@@ -34,17 +34,25 @@ export default function Nav({ admin = false }: { admin?: boolean }) {
 
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200/70 bg-white/80 backdrop-blur-md">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
-        <Link href="/" className="flex items-center gap-2 text-[15px] font-semibold tracking-tight">
+      <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 sm:px-6">
+        <Link
+          href="/"
+          className="flex shrink-0 items-center gap-2 text-[15px] font-semibold tracking-tight"
+        >
           <span
             className="grid h-6 w-6 place-items-center rounded-md bg-slate-900 text-[11px] font-bold text-white"
             aria-hidden
           >
             J
           </span>
-          <span>Jenosize <span className="text-slate-400">Affiliate</span></span>
+          <span className="hidden sm:inline">
+            Jenosize <span className="text-slate-400">Affiliate</span>
+          </span>
         </Link>
-        <nav className="flex items-center gap-1 text-sm">
+        <nav
+          className="flex flex-1 items-center justify-end gap-1 overflow-x-auto text-sm
+            [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
           {admin ? (
             <>
               <NavLink href="/admin/dashboard" pathname={pathname}>Dashboard</NavLink>
