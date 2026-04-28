@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { toast } from 'sonner';
 import type { CampaignDto, ProductDto } from '@jenosize/shared';
 
@@ -51,10 +52,41 @@ export default function GenerateLinkForm({ products, campaigns }: Props) {
   }
 
   if (products.length === 0 || campaigns.length === 0) {
+    const missing: { label: string; href: string; cta: string }[] = [];
+    if (products.length === 0)
+      missing.push({
+        label: 'You don’t have any products yet.',
+        href: '/admin/products',
+        cta: 'Add a product →',
+      });
+    if (campaigns.length === 0)
+      missing.push({
+        label: 'No campaigns exist to attach the link to.',
+        href: '/admin/campaigns',
+        cta: 'Create a campaign →',
+      });
     return (
-      <div className="card text-sm text-slate-500">
-        {products.length === 0 && <p>Add at least one product first.</p>}
-        {campaigns.length === 0 && <p>Create at least one campaign first.</p>}
+      <div className="card space-y-3">
+        <div>
+          <p className="text-sm font-medium text-slate-900">
+            A link binds <span className="font-semibold">a product</span> to{' '}
+            <span className="font-semibold">a campaign</span> for one
+            marketplace — finish the prerequisites first.
+          </p>
+        </div>
+        <ul className="space-y-2">
+          {missing.map((m) => (
+            <li
+              key={m.href}
+              className="flex flex-col gap-2 rounded-md border border-dashed border-slate-200 bg-slate-50/60 px-3 py-2 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <span className="text-sm text-slate-600">{m.label}</span>
+              <Link href={m.href} className="btn-outline self-start text-xs sm:self-auto">
+                {m.cta}
+              </Link>
+            </li>
+          ))}
+        </ul>
       </div>
     );
   }

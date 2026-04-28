@@ -9,11 +9,13 @@ export class DashboardService {
   constructor(private readonly prisma: PrismaService) {}
 
   async summary(): Promise<DashboardSummary> {
+    const now = new Date();
     const [
       totalClicks,
       totalLinks,
       totalProducts,
       totalCampaigns,
+      activeCampaigns,
       byMarketplaceRows,
       byCampaignRows,
       last7,
@@ -22,6 +24,9 @@ export class DashboardService {
       this.prisma.link.count(),
       this.prisma.product.count(),
       this.prisma.campaign.count(),
+      this.prisma.campaign.count({
+        where: { startAt: { lte: now }, endAt: { gte: now } },
+      }),
       this.prisma.$queryRaw<Array<{ marketplace: Marketplace; clicks: bigint }>>`
         SELECT l."marketplace" AS marketplace, COUNT(c.*) AS clicks
         FROM "Link" l
@@ -50,6 +55,7 @@ export class DashboardService {
       totalLinks,
       totalProducts,
       totalCampaigns,
+      activeCampaigns,
       byMarketplace: byMarketplaceRows.map((r) => ({
         marketplace: r.marketplace,
         clicks: Number(r.clicks),

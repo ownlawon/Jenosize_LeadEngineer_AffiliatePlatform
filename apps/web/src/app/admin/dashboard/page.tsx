@@ -2,6 +2,7 @@ import { apiFetch } from '@/lib/api';
 import type { DashboardSummary, TopProduct } from '@jenosize/shared';
 import DashboardChart from './DashboardChart';
 import ResetDemoButton from '@/components/ResetDemoButton';
+import OnboardingCard from '@/components/OnboardingCard';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,11 +24,20 @@ export default async function DashboardPage() {
         <ResetDemoButton />
       </div>
 
+      {summary.totalProducts === 0 && <OnboardingCard />}
+
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <Stat label="Total clicks" value={summary.totalClicks} />
         <Stat label="Total links" value={summary.totalLinks} />
         <Stat label="Avg clicks / link" value={ctr} />
-        <Stat label="Active campaigns" value={summary.totalCampaigns} />
+        <Stat
+          label="Active campaigns"
+          value={
+            summary.activeCampaigns === summary.totalCampaigns
+              ? summary.activeCampaigns
+              : `${summary.activeCampaigns} / ${summary.totalCampaigns}`
+          }
+        />
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">

@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import Nav from '@/components/Nav';
 import { apiFetch, ApiError, isAuthenticated } from '@/lib/api';
 
@@ -80,7 +81,13 @@ export default async function CampaignPage({ params }: { params: { id: string } 
   return (
     <>
       <Nav admin={isAuthenticated()} />
-      <main className="mx-auto max-w-6xl px-6 py-10">
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
+        <Link
+          href="/"
+          className="mb-4 inline-flex items-center gap-1 text-xs text-slate-500 transition-colors hover:text-slate-900"
+        >
+          <span aria-hidden>←</span> All campaigns
+        </Link>
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight">{campaign.name}</h1>
           <p className="mt-2 text-sm text-slate-500">
@@ -110,9 +117,13 @@ export default async function CampaignPage({ params }: { params: { id: string } 
 }
 
 function ProductRow({ product }: { product: ProductWithLinks }) {
-  const minPrice = product.offers.length
-    ? Math.min(...product.offers.map((o) => o.price))
-    : null;
+  const prices = product.offers.map((o) => o.price);
+  const minPrice = prices.length ? Math.min(...prices) : null;
+  const maxPrice = prices.length ? Math.max(...prices) : null;
+  const savings =
+    minPrice !== null && maxPrice !== null && maxPrice > minPrice
+      ? maxPrice - minPrice
+      : 0;
   return (
     <div className="card flex flex-col gap-4 sm:flex-row sm:items-center">
       <div className="relative h-36 w-36 flex-shrink-0 overflow-hidden rounded-lg bg-slate-100">
@@ -120,7 +131,14 @@ function ProductRow({ product }: { product: ProductWithLinks }) {
         <img src={product.imageUrl} alt={product.title} className="h-full w-full object-cover" />
       </div>
       <div className="flex-1">
-        <h3 className="font-semibold">{product.title}</h3>
+        <div className="flex items-baseline justify-between gap-2">
+          <h3 className="font-semibold">{product.title}</h3>
+          {savings > 0 && (
+            <span className="badge whitespace-nowrap bg-emerald-100 text-emerald-700">
+              Save ฿{savings.toLocaleString()}
+            </span>
+          )}
+        </div>
         <div className="mt-3 space-y-2">
           {product.offers.map((o) => {
             const isBest = o.price === minPrice;
@@ -141,7 +159,7 @@ function ProductRow({ product }: { product: ProductWithLinks }) {
                   <div className="text-xs text-slate-500">{o.storeName}</div>
                 </div>
                 <div className="text-right">
-                  <div className="font-semibold">
+                  <div className="font-semibold tabular-nums">
                     ฿{o.price.toLocaleString()}
                   </div>
                   {o.shortCode ? (

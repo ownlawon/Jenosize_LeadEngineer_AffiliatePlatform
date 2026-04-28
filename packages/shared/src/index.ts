@@ -103,6 +103,8 @@ export interface DashboardSummary {
   totalLinks: number;
   totalProducts: number;
   totalCampaigns: number;
+  /** Campaigns whose start/end range covers `now`; ≤ totalCampaigns. */
+  activeCampaigns: number;
   byMarketplace: Array<{ marketplace: Marketplace; clicks: number }>;
   byCampaign: Array<{ campaignId: string; name: string; clicks: number }>;
   clicksLast7Days: Array<{ date: string; clicks: number }>;

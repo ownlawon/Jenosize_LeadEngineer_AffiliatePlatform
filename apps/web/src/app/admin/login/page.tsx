@@ -61,6 +61,8 @@ function LoginForm() {
             onChange={(e) => setEmail(e.target.value)}
             className="input"
             autoComplete="username"
+            autoFocus
+            required
           />
         </div>
         <div>
@@ -71,6 +73,8 @@ function LoginForm() {
             onChange={(e) => setPassword(e.target.value)}
             className="input"
             autoComplete="current-password"
+            required
+            minLength={8}
           />
         </div>
         {error && <p className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>}
