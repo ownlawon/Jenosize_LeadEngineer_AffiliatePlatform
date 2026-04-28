@@ -7,7 +7,7 @@
       "storeName": "Matcha Official Store",
       "price": 459,
       "currency": "THB",
-      "url": "https://www.lazada.co.th/products/matcha-001.html"
+      "url": "https://www.lazada.co.th/catalog/?q=matcha+powder+ceremonial"
     },
     "yoga-mat-77": {
       "externalId": "yoga-mat-77",
@@ -16,7 +16,7 @@
       "storeName": "FitLife Store",
       "price": 690,
       "currency": "THB",
-      "url": "https://www.lazada.co.th/products/yoga-mat-77.html"
+      "url": "https://www.lazada.co.th/catalog/?q=yoga+mat+non+slip"
     },
     "wireless-earbuds-x9": {
       "externalId": "wireless-earbuds-x9",
@@ -25,7 +25,7 @@
       "storeName": "Audio Hub Official",
       "price": 1290,
       "currency": "THB",
-      "url": "https://www.lazada.co.th/products/wireless-earbuds-x9.html"
+      "url": "https://www.lazada.co.th/catalog/?q=wireless+bluetooth+earbuds"
     },
     "coffee-beans-arabica": {
       "externalId": "coffee-beans-arabica",
@@ -34,7 +34,7 @@
       "storeName": "Roastery Direct",
       "price": 380,
       "currency": "THB",
-      "url": "https://www.lazada.co.th/products/coffee-beans-arabica.html"
+      "url": "https://www.lazada.co.th/catalog/?q=arabica+coffee+beans"
     },
     "skincare-glow-set": {
       "externalId": "skincare-glow-set",
@@ -43,7 +43,7 @@
       "storeName": "Glow Beauty Lazada",
       "price": 890,
       "currency": "THB",
-      "url": "https://www.lazada.co.th/products/skincare-glow-set.html"
+      "url": "https://www.lazada.co.th/catalog/?q=vitamin+c+skincare+set"
     },
     "mechanical-keyboard-75": {
       "externalId": "mechanical-keyboard-75",
@@ -52,7 +52,7 @@
       "storeName": "PC Gear Mall",
       "price": 2890,
       "currency": "THB",
-      "url": "https://www.lazada.co.th/products/mechanical-keyboard-75.html"
+      "url": "https://www.lazada.co.th/catalog/?q=mechanical+keyboard"
     }
   },
   "SHOPEE": {
@@ -63,7 +63,7 @@
       "storeName": "Matcha Thailand",
       "price": 425,
       "currency": "THB",
-      "url": "https://shopee.co.th/product/123456/matcha-001"
+      "url": "https://shopee.co.th/search?keyword=matcha+powder+ceremonial"
     },
     "yoga-mat-77": {
       "externalId": "yoga-mat-77",
@@ -72,7 +72,7 @@
       "storeName": "Yoga Lover TH",
       "price": 720,
       "currency": "THB",
-      "url": "https://shopee.co.th/product/123456/yoga-mat-77"
+      "url": "https://shopee.co.th/search?keyword=yoga+mat+non+slip"
     },
     "wireless-earbuds-x9": {
       "externalId": "wireless-earbuds-x9",
@@ -81,7 +81,7 @@
       "storeName": "Gadget Shop SHP",
       "price": 1199,
       "currency": "THB",
-      "url": "https://shopee.co.th/product/123456/wireless-earbuds-x9"
+      "url": "https://shopee.co.th/search?keyword=wireless+bluetooth+earbuds"
     },
     "coffee-beans-arabica": {
       "externalId": "coffee-beans-arabica",
@@ -90,7 +90,7 @@
       "storeName": "Coffee Bros Shopee",
       "price": 359,
       "currency": "THB",
-      "url": "https://shopee.co.th/product/123456/coffee-beans-arabica"
+      "url": "https://shopee.co.th/search?keyword=arabica+coffee+beans"
     },
     "skincare-glow-set": {
       "externalId": "skincare-glow-set",
@@ -99,7 +99,7 @@
       "storeName": "K-Beauty Outlet",
       "price": 829,
       "currency": "THB",
-      "url": "https://shopee.co.th/product/123456/skincare-glow-set"
+      "url": "https://shopee.co.th/search?keyword=vitamin+c+skincare+set"
     },
     "mechanical-keyboard-75": {
       "externalId": "mechanical-keyboard-75",
@@ -108,7 +108,7 @@
       "storeName": "Keyboard Lab TH",
       "price": 2750,
       "currency": "THB",
-      "url": "https://shopee.co.th/product/123456/mechanical-keyboard-75"
+      "url": "https://shopee.co.th/search?keyword=mechanical+keyboard"
     }
   }
 }
