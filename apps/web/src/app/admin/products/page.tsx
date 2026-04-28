@@ -11,6 +11,14 @@ export default async function AdminProductsPage() {
   );
   const products = data.items;
 
+  // Build a set of "<externalId>|<marketplace>" keys for the existing
+  // offer pairs so the Quick Sample buttons can mark themselves as
+  // already-added. Reviewer can see at a glance which fixtures still
+  // bring fresh rows vs which would just upsert in place.
+  const existingOfferKeys = new Set(
+    products.flatMap((p) => p.offers.map((o) => `${o.externalId}|${o.marketplace}`)),
+  );
+
   return (
     <div className="space-y-8">
       <div>
@@ -18,7 +26,7 @@ export default async function AdminProductsPage() {
         <p className="text-sm text-slate-500">Add by Lazada/Shopee URL or SKU</p>
       </div>
 
-      <AddProductForm />
+      <AddProductForm existingOfferKeys={Array.from(existingOfferKeys)} />
 
       <div className="card overflow-x-auto p-0">
         <table className="min-w-full divide-y divide-slate-200 text-sm">
