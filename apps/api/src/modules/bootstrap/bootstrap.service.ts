@@ -8,13 +8,22 @@ import { PrismaService } from '../../prisma/prisma.service';
 const SHORT_CODE_ALPHABET = 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const generateShortCode = customAlphabet(SHORT_CODE_ALPHABET, 6);
 
-const SAMPLE_EXTERNAL_IDS = [
+/**
+ * The auto-seed populates only the first half of the fixture catalogue so a
+ * reviewer landing on /admin/products has both:
+ *   • a populated demo to look at (3 products with both Lazada + Shopee
+ *     offers + 1 campaign + 6 links + best-price badges)
+ *   • net-new products to add via the Quick Samples row (Coffee, Skincare,
+ *     Keyboard) — clicking those produces visible feedback in the table,
+ *     instead of an upsert no-op against pre-existing rows.
+ *
+ * The other three SKUs still ship in packages/adapters fixtures and the
+ * Quick Sample buttons; they're just not seeded by default.
+ */
+const SEED_EXTERNAL_IDS = [
   'matcha-001',
   'yoga-mat-77',
   'wireless-earbuds-x9',
-  'coffee-beans-arabica',
-  'skincare-glow-set',
-  'mechanical-keyboard-75',
 ];
 
 /**
@@ -75,7 +84,7 @@ export class BootstrapService implements OnModuleInit {
 
   private async seedProductsAndOffers(): Promise<string[]> {
     const ids: string[] = [];
-    for (const externalId of SAMPLE_EXTERNAL_IDS) {
+    for (const externalId of SEED_EXTERNAL_IDS) {
       const lazada = await this.upsertProductWithOffer(externalId, 'LAZADA');
       const shopee = await this.upsertProductWithOffer(externalId, 'SHOPEE');
       // Same title across marketplaces → upsert merged into one product row.

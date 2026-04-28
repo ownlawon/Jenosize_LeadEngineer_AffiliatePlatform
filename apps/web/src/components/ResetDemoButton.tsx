@@ -19,7 +19,9 @@ export default function ResetDemoButton() {
     const confirmed = window.confirm(
       'Reset the demo to a clean state?\n\n' +
         'This will delete every product, campaign, link, and click row, then ' +
-        're-seed the fixture catalogue (6 products + Summer Deal 2025 + 12 links).\n\n' +
+        're-seed 3 starter products + Summer Deal 2025 + 6 links — leaving ' +
+        'the other three Quick Samples (Coffee, Skincare, Keyboard) for the ' +
+        'reviewer to add fresh.\n\n' +
         'Admin users are preserved.',
     );
     if (!confirmed) return;
@@ -69,8 +71,9 @@ export default function ResetDemoButton() {
         className="pointer-events-none absolute right-0 top-full z-20 mt-2 w-64 origin-top-right rounded-md border border-slate-200 bg-white p-3 text-[11px] leading-relaxed text-slate-600 opacity-0 shadow-lg transition-opacity duration-150 group-hover/reset:opacity-100 group-focus-within/reset:opacity-100"
       >
         Wipes <span className="font-medium text-slate-900">all products, campaigns, links, and clicks</span>,
-        then re-seeds the fixture catalogue (6 products + 1 campaign + 12 links).
-        Admin users are preserved.
+        then re-seeds 3 starter products + 1 campaign + 6 links — the other
+        three SKUs are left for the reviewer to add via Quick Samples. Admin
+        users are preserved.
       </span>
     </div>
   );

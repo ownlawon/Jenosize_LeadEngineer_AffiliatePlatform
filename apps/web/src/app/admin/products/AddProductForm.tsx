@@ -77,7 +77,7 @@ export default function AddProductForm() {
         <summary className="flex cursor-pointer list-none select-none items-center gap-2 px-3 py-2 [&::-webkit-details-marker]:hidden">
           <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500" aria-hidden />
           <span className="font-medium">Demo mode</span>
-          <span className="text-slate-400 group-open:hidden">— mock catalogue, six sample SKUs</span>
+          <span className="text-slate-400 group-open:hidden">— mock catalogue, 3 seeded + 3 to add via Quick Samples</span>
           <span className="ml-auto text-slate-400 group-open:hidden">Show details</span>
           <span className="ml-auto hidden text-amber-700 group-open:inline">Hide</span>
         </summary>
