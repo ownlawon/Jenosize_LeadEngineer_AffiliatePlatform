@@ -154,6 +154,43 @@ export default function AddProductForm({ existingOfferKeys = [] }: AddProductFor
           </button>
         </div>
 
+        {/* Detect "SKU-shaped" input while still on Auto-detect — Auto needs
+            a URL host, so warn before the user submits and gets a 400. */}
+        {(() => {
+          const trimmed = url.trim();
+          const looksLikeSku =
+            trimmed.length > 0 && !trimmed.includes('/') && !trimmed.includes(':');
+          if (!looksLikeSku || marketplace !== 'AUTO') return null;
+          return (
+            <div className="flex flex-col gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 sm:flex-row sm:items-center">
+              <span className="flex-1">
+                <span className="font-semibold">Looks like a SKU.</span>{' '}
+                Auto-detect needs a URL host — pick a marketplace to resolve{' '}
+                <code className="rounded bg-white/70 px-1 py-0.5 font-mono">
+                  {trimmed}
+                </code>
+                .
+              </span>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setMarketplace('LAZADA')}
+                  className="rounded border border-amber-300 bg-white px-2 py-1 text-[11px] font-medium text-amber-900 hover:bg-amber-100"
+                >
+                  Use Lazada
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMarketplace('SHOPEE')}
+                  className="rounded border border-amber-300 bg-white px-2 py-1 text-[11px] font-medium text-amber-900 hover:bg-amber-100"
+                >
+                  Use Shopee
+                </button>
+              </div>
+            </div>
+          );
+        })()}
+
         <p className="text-[11px] leading-relaxed text-slate-500">
           <span className="font-medium text-slate-600">Examples:</span>{' '}
           URL <code className="rounded bg-slate-100 px-1 py-0.5">https://www.lazada.co.th/products/matcha-001.html</code>{' '}
