@@ -114,8 +114,8 @@ function ProductRow({ product }: { product: ProductWithLinks }) {
     ? Math.min(...product.offers.map((o) => o.price))
     : null;
   return (
-    <div className="card flex flex-col gap-4 sm:flex-row sm:items-start">
-      <div className="relative h-32 w-32 flex-shrink-0 self-start overflow-hidden rounded-lg bg-slate-100">
+    <div className="card flex flex-col gap-4 sm:flex-row sm:items-center">
+      <div className="relative h-36 w-36 flex-shrink-0 overflow-hidden rounded-lg bg-slate-100">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={product.imageUrl} alt={product.title} className="h-full w-full object-cover" />
       </div>
