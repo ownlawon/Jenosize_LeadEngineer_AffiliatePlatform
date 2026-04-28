@@ -241,18 +241,53 @@ export default function AddProductForm({ existingOfferKeys = [] }: AddProductFor
 
         <details className="mt-4 group rounded-md border border-slate-200 bg-slate-50/50 text-xs text-slate-600">
           <summary className="flex cursor-pointer list-none select-none items-center gap-2 px-3 py-2 font-medium text-slate-700 [&::-webkit-details-marker]:hidden">
-            <span>Or paste a URL by hand</span>
-            <span className="text-slate-400 group-open:hidden">— show 12 sample URLs</span>
+            <span>Or paste a URL / SKU by hand</span>
+            <span className="text-slate-400 group-open:hidden">— 6 SKUs · 12 URLs</span>
             <span className="ml-auto text-slate-400 group-open:hidden">▾</span>
             <span className="ml-auto hidden text-slate-400 group-open:inline">▴</span>
           </summary>
-          <div className="border-t border-slate-200 p-3 space-y-2">
-            <p className="text-[11px] leading-relaxed text-slate-500">
-              Copy any URL below into the input above and click{' '}
-              <span className="font-medium text-slate-700">Add product</span>.
-              Same effect as clicking the matching Quick Sample button.
-            </p>
-            <ul className="space-y-1 font-mono text-[11px]">
+          <div className="border-t border-slate-200 p-3 space-y-4">
+            {/* SKU section — 6 unique codes that work for either marketplace
+                when the selector above is set explicitly. */}
+            <div>
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                SKUs · pick Lazada or Shopee above first
+              </p>
+              <ul className="grid grid-cols-1 gap-1 font-mono text-[11px] sm:grid-cols-2">
+                {Array.from(new Set(SAMPLES.map((s) => s.externalId))).map((sku) => (
+                  <li
+                    key={sku}
+                    className="flex items-center gap-2 rounded bg-white/60 px-2 py-1"
+                  >
+                    <span className="truncate text-slate-700" title={sku}>
+                      {sku}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={async (e) => {
+                        e.preventDefault();
+                        try {
+                          await navigator.clipboard.writeText(sku);
+                          toast.success('SKU copied');
+                        } catch {
+                          toast.error('Clipboard not available');
+                        }
+                      }}
+                      className="ml-auto rounded border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-medium text-slate-600 hover:bg-slate-50"
+                    >
+                      Copy
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Full-URL section — Auto-detect handles these. */}
+            <div>
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                Full URLs · Auto-detect handles these
+              </p>
+              <ul className="space-y-1 font-mono text-[11px]">
               {SAMPLES.map((s) => {
                 const added = existingSet.has(`${s.externalId}|${s.marketplace}`);
                 return (
@@ -300,7 +335,8 @@ export default function AddProductForm({ existingOfferKeys = [] }: AddProductFor
                   </li>
                 );
               })}
-            </ul>
+              </ul>
+            </div>
           </div>
         </details>
       </div>
