@@ -1,10 +1,11 @@
 import Nav from '@/components/Nav';
 import { Skeleton } from '@/components/Skeleton';
+import { isAuthenticated } from '@/lib/api';
 
 export default function HomeLoading() {
   return (
     <>
-      <Nav />
+      <Nav admin={isAuthenticated()} />
       <main className="mx-auto max-w-6xl px-6 py-12">
         <Skeleton className="mb-12 h-48 rounded-2xl" />
         <Skeleton className="mb-4 h-6 w-40" />

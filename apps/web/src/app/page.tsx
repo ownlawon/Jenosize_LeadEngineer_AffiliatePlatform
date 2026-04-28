@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Nav from '@/components/Nav';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, isAuthenticated } from '@/lib/api';
 import type { CampaignDto } from '@jenosize/shared';
 
 export const dynamic = 'force-dynamic';
@@ -16,7 +16,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <Nav />
+      <Nav admin={isAuthenticated()} />
       <main className="mx-auto max-w-6xl px-6 py-12">
         <section className="mb-12 rounded-2xl bg-gradient-to-br from-brand-600 to-indigo-700 p-10 text-white shadow-lg">
           <h1 className="text-3xl font-bold tracking-tight md:text-4xl">

@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Nav from '@/components/Nav';
-import { apiFetch, ApiError } from '@/lib/api';
+import { apiFetch, ApiError, isAuthenticated } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
@@ -79,7 +79,7 @@ export default async function CampaignPage({ params }: { params: { id: string } 
 
   return (
     <>
-      <Nav />
+      <Nav admin={isAuthenticated()} />
       <main className="mx-auto max-w-6xl px-6 py-10">
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight">{campaign.name}</h1>

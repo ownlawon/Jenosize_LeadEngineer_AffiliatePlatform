@@ -1,10 +1,11 @@
 import Nav from '@/components/Nav';
 import { Skeleton } from '@/components/Skeleton';
+import { isAuthenticated } from '@/lib/api';
 
 export default function CampaignLoading() {
   return (
     <>
-      <Nav />
+      <Nav admin={isAuthenticated()} />
       <main className="mx-auto max-w-6xl px-6 py-10">
         <div className="mb-8 space-y-3">
           <Skeleton className="h-9 w-2/3 max-w-md" />
