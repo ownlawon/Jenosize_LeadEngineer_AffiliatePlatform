@@ -1,5 +1,5 @@
 # --- Builder ---
-FROM node:20-bookworm-slim AS builder
+FROM node:25-bookworm-slim AS builder
 RUN apt-get update -y && apt-get install -y --no-install-recommends openssl ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
@@ -35,7 +35,7 @@ RUN pnpm --filter @jenosize/api db:generate \
  && test -f /app/apps/api/dist/main.js
 
 # --- Runner ---
-FROM node:20-bookworm-slim AS runner
+FROM node:25-bookworm-slim AS runner
 RUN apt-get update -y && apt-get install -y --no-install-recommends openssl ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
