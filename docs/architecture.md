@@ -197,3 +197,58 @@ After deploying to Railway, walk through this checklist on the public URLs:
 - [ ] **Logout** — cookie cleared; `/admin/dashboard` redirects to `/admin/login?next=...`
 
 If every box is ticked, the submission is functionally complete.
+
+---
+
+## Performance & scaling notes
+
+Numbers below are *design targets* for the redirect path — the only
+end-user-facing latency-critical surface — assuming the deployed
+Railway sizing (shared 0.5 vCPU, ~512 MB).
+
+| Metric | Target | Why |
+|--------|--------|-----|
+| `/go/:code` p50 (warm cache) | **< 10 ms** | Single Redis `GET` + URL build |
+| `/go/:code` p95 | **< 30 ms** | Redis tail latency + Express overhead |
+| Cold cache (Redis miss) | **30–60 ms** | Adds Postgres `SELECT` + Redis `SET` |
+| Click insertion | **off-path** | `setImmediate` defers the row write |
+| Sustainable RPS (single replica) | **~500–800** | Bound by Redis `GET` + Node event loop |
+
+### Why this layout earns the headroom
+
+1. **Redis on the hot path, not the DB.** A short-code → target lookup
+   is a deterministic key→value with a 5-minute TTL. Hitting Redis
+   first turns redirect serving into a single network round-trip in
+   the same data center.
+2. **Click write off the response path.** `RedirectService.resolveAndTrack()`
+   resolves and returns; the `Click` insert is queued via
+   `setImmediate` and runs on the next event-loop tick. A slow
+   database doesn't slow the user's redirect.
+3. **Indexed click reads.** `Click(linkId, timestamp)` and
+   `Click(timestamp)` indexes back the dashboard aggregations. The
+   most expensive query (`clicksLast7Days`) groups by truncated day
+   over a bounded 7-day window, not a full table scan.
+
+### Where this would break first
+
+- **Redis falls over** → fall-through to Postgres still works, but
+  every redirect now costs a DB round-trip; p95 doubles. Mitigation:
+  add Postgres read replica + LRU process cache as belt-and-braces.
+- **Click table grows.** At 10 M rows/month the dashboard's `GROUP
+  BY date_trunc('day', timestamp)` starts feeling its age.
+  Mitigation: a daily aggregation job into a `ClickDaily` materialised
+  table; the dashboard reads from there. Documented in the README's
+  Future Roadmap.
+- **Single api replica.** Cron and HTTP share the same process. The
+  cron is hourly-ish, so contention is negligible at MVP scale; the
+  obvious next step is splitting the cron into its own service when
+  we move beyond mocks (see `Future roadmap` → "Bull queue").
+
+### What we explicitly don't optimise (yet)
+
+- **Edge caching the 302 itself.** Cloudflare / Vercel Edge could
+  serve `/go/:code` from POPs but would lose per-click attribution
+  fidelity. Wrong trade for an analytics product.
+- **Connection pool tuning.** Prisma defaults are fine for a single
+  replica; the moment we shard or add read-replicas we'd revisit
+  with `connection_limit` + pgBouncer.

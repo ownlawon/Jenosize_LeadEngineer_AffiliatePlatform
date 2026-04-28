@@ -1,0 +1,40 @@
+version: 2
+updates:
+  # JS / pnpm workspace
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels: ["dependencies"]
+    groups:
+      nest:
+        patterns: ["@nestjs/*"]
+      next:
+        patterns: ["next", "eslint-config-next", "@next/*"]
+      prisma:
+        patterns: ["prisma", "@prisma/*"]
+      testing:
+        patterns: ["jest", "ts-jest", "@types/jest", "supertest", "@types/supertest"]
+      types:
+        patterns: ["@types/*"]
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    labels: ["ci"]
+
+  # Docker base images
+  - package-ecosystem: "docker"
+    directory: "/apps/api"
+    schedule:
+      interval: "monthly"
+    labels: ["infra"]
+  - package-ecosystem: "docker"
+    directory: "/apps/web"
+    schedule:
+      interval: "monthly"
+    labels: ["infra"]

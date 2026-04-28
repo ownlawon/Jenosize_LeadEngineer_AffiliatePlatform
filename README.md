@@ -1,8 +1,16 @@
 # Jenosize Affiliate Platform
 
+[![CI](https://github.com/ownlawon/Jenosize_LeadEngineer_AffiliatePlatform/actions/workflows/ci.yml/badge.svg)](https://github.com/ownlawon/Jenosize_LeadEngineer_AffiliatePlatform/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/ownlawon/Jenosize_LeadEngineer_AffiliatePlatform/actions/workflows/codeql.yml/badge.svg)](https://github.com/ownlawon/Jenosize_LeadEngineer_AffiliatePlatform/actions/workflows/codeql.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-slategray.svg)](LICENSE)
+![Node ≥20](https://img.shields.io/badge/node-%E2%89%A520-339933?logo=node.js&logoColor=white)
+![pnpm 9](https://img.shields.io/badge/pnpm-9-F69220?logo=pnpm&logoColor=white)
+
 > **Test Assignment — Software Engineer (Lead Engineer) · Jenosize**
 >
 > Affiliate web app that compares prices between **Lazada** and **Shopee**, generates trackable affiliate short links per campaign, and shows click analytics on an admin dashboard.
+
+**Reading order for reviewers:** [`docs/decisions.md`](docs/decisions.md) (7 ADRs · the *why*) → [`docs/architecture.md`](docs/architecture.md) (diagrams + perf) → [`docs/api-recipes.md`](docs/api-recipes.md) (cURL playbook) → [`docs/UAT.md`](docs/UAT.md) (38 acceptance cases).
 
 ## Demo
 
