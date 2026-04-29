@@ -29,7 +29,7 @@ const SEED_EXTERNAL_IDS = [
 /**
  * One-shot demo seeder. Runs on every container start, but only writes if the
  * database has zero products — so the first deploy pre-populates a working
- * demo (six products, one campaign, twelve affiliate links) and subsequent
+ * demo (three products, one campaign, six affiliate links) and subsequent
  * boots are no-ops. Idempotent and safe to leave enabled in production: any
  * real product/campaign data would suppress the seed.
  */
@@ -56,20 +56,30 @@ export class BootstrapService implements OnModuleInit {
    * isn't logged out. Exposed so the admin "reset demo" endpoint can call
    * it on demand.
    */
-  async wipeAndReseed(): Promise<{ products: number; links: number; clicks: number }> {
-    this.log.warn('Resetting demo data — wiping clicks/links/campaigns/offers/products');
-    // Order matters: respect FK chain — Click → Link → (Campaign, Offer) → Product
+  async wipeAndReseed(): Promise<{
+    products: number;
+    links: number;
+    clicks: number;
+    impressions: number;
+  }> {
+    this.log.warn('Resetting demo data — wiping clicks/impressions/links/campaigns/offers/products');
+    // Order matters: respect FK chain — (Click, Impression) → Link → (Campaign, Offer) → Product
     const wipedClicks = await this.prisma.click.deleteMany();
+    const wipedImpressions = await this.prisma.impression.deleteMany();
     const wipedLinks = await this.prisma.link.deleteMany();
     await this.prisma.campaign.deleteMany();
     await this.prisma.offer.deleteMany();
     await this.prisma.product.deleteMany();
     const result = await this.seedAll();
     this.log.warn(
-      `Reset complete — wiped ${wipedClicks.count} clicks + ${wipedLinks.count} links, ` +
+      `Reset complete — wiped ${wipedClicks.count} clicks + ${wipedImpressions.count} impressions + ${wipedLinks.count} links, ` +
         `re-seeded ${result.products} products + ${result.links} links`,
     );
-    return { ...result, clicks: wipedClicks.count };
+    return {
+      ...result,
+      clicks: wipedClicks.count,
+      impressions: wipedImpressions.count,
+    };
   }
 
   private async seedAll(): Promise<{ products: number; links: number }> {

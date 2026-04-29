@@ -12,7 +12,14 @@ export default async function DashboardPage() {
     apiFetch<TopProduct[]>('/api/dashboard/top-products?limit=5', { authed: true }),
   ]);
 
-  const ctr = summary.totalLinks > 0 ? (summary.totalClicks / summary.totalLinks).toFixed(2) : '0.00';
+  const ctrLabel =
+    summary.ctr === null
+      ? '—'
+      : `${(summary.ctr * 100).toFixed(summary.ctr < 0.01 ? 2 : 1)}%`;
+  const ctrHint =
+    summary.ctr === null
+      ? `0 / ${summary.totalImpressions.toLocaleString()} impressions`
+      : `${summary.totalClicks.toLocaleString()} / ${summary.totalImpressions.toLocaleString()} impressions`;
 
   return (
     <div className="space-y-8">
@@ -28,8 +35,8 @@ export default async function DashboardPage() {
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <Stat label="Total clicks" value={summary.totalClicks} />
-        <Stat label="Total links" value={summary.totalLinks} />
-        <Stat label="Avg clicks / link" value={ctr} />
+        <Stat label="Total impressions" value={summary.totalImpressions} />
+        <Stat label="CTR" value={ctrLabel} hint={ctrHint} />
         <Stat
           label="Active campaigns"
           value={summary.activeCampaigns}

@@ -12,8 +12,10 @@ SemVer because this is a one-shot assignment submission.
   `packages/adapters`, `packages/shared`).
 - NestJS 10 + Prisma 5 + Postgres 16 + Redis 7 backend, Next.js 14
   frontend.
-- Five-entity domain model: `Product / Offer / Campaign / Link / Click`
-  with FK chain + unique constraints for idempotent upserts.
+- Six-entity domain model: `Product / Offer / Campaign / Link / Click /
+  Impression` with FK chain + unique constraints for idempotent upserts.
+  (The five entities required by the brief plus `Impression` to back a
+  real CTR metric.)
 
 ### Features
 
@@ -27,8 +29,14 @@ SemVer because this is a one-shot assignment submission.
   `/go/<code>` 302 redirect with UTM appended at lookup time.
 - Click tracking — `referrer`, `userAgent`, hashed IP — recorded
   asynchronously so the redirect path is never blocked.
-- Analytics dashboard: KPIs, by-marketplace breakdown, by-campaign
-  breakdown, top products leaderboard, last-7-days bar chart.
+- Impression tracking via `IntersectionObserver` on the public landing
+  page: a product card counts as one impression per Lazada/Shopee link
+  once it is ≥50% visible for ≥1 second. `sessionStorage` dedupe
+  prevents the same shopper from inflating counts by scrolling. Backs
+  a real `CTR = clicks ÷ impressions` KPI on the admin dashboard.
+- Analytics dashboard: KPIs (clicks, impressions, **CTR**, active
+  campaigns), by-marketplace breakdown, by-campaign breakdown, top
+  products leaderboard, last-7-days bar chart.
 - Public landing page with active campaigns + per-campaign price
   comparison view.
 - Cron `PriceRefreshJob` re-runs the adapter every 6 hours; mock
@@ -60,10 +68,23 @@ SemVer because this is a one-shot assignment submission.
 
 ### Reviewer experience
 
-- `BootstrapService` auto-seeds 6 products + 1 campaign + 12 links on
-  first boot when the catalogue is empty.
+- `BootstrapService` auto-seeds 3 starter products + 1 campaign + 6
+  links on first boot when the catalogue is empty. The other 3 fixture
+  SKUs ship in `Quick Samples` so the reviewer's first click visibly
+  adds a row instead of being a no-op upsert.
 - Admin "Reset demo data" button + `POST /api/admin/reset-demo`
   endpoint that wipes domain rows and re-seeds in one call.
+- `/admin/products` form supports raw-SKU input via a marketplace
+  selector (Auto-detect / Lazada / Shopee). Auto resolves URLs by host;
+  picking a marketplace lets the reviewer paste a bare SKU
+  (`matcha-001`) without a URL.
+- `/admin/products` collapsible reference panel exposes 6 SKUs (with
+  per-row Copy buttons) and 12 fixture URLs so by-hand testing doesn't
+  require typing.
+- `/admin/links` table renames "Short link" to a 6-column layout —
+  Product (image + title), Campaign (name + UTM slug), Short link,
+  Marketplace, Clicks, Copy — so reviewers can see what each row
+  promotes at a glance.
 - Onboarding card on the dashboard when `totalProducts === 0` walks
   the admin through the three-step flow.
 - Demo-mode banner on `/admin/products` collapses to a single-line
@@ -78,8 +99,9 @@ SemVer because this is a one-shot assignment submission.
 
 ### Known caveats
 
-- Mock adapter only resolves the six fixture SKUs. Real Lazada/Shopee
-  URLs return a 400 explaining this.
+- Mock adapter only resolves the six fixture SKUs (3 auto-seeded plus
+  3 surfaced via Quick Samples). Real Lazada/Shopee URLs return a 400
+  explaining this.
 - `SHORT_LINK_BASE_URL` should include scheme (`https://...`).
   Missing scheme degrades the displayed `shortUrl` only — actual
   redirects still work via the api domain.

@@ -11,6 +11,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ProductsModule } from './modules/products/products.module';
 import { CampaignsModule } from './modules/campaigns/campaigns.module';
 import { LinksModule } from './modules/links/links.module';
+import { ImpressionsModule } from './modules/impressions/impressions.module';
 import { RedirectModule } from './modules/redirect/redirect.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { JobsModule } from './modules/jobs/jobs.module';
@@ -32,6 +33,7 @@ import { HealthController } from './modules/health/health.controller';
     ProductsModule,
     CampaignsModule,
     LinksModule,
+    ImpressionsModule,
     RedirectModule,
     DashboardModule,
     JobsModule,

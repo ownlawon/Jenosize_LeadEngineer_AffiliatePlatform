@@ -33,9 +33,14 @@ export default function ResetDemoButton() {
         const data = await res.json().catch(() => ({}));
         throw new Error(data?.message ?? data?.error ?? `HTTP ${res.status}`);
       }
-      const data = (await res.json()) as { products: number; links: number; clicks: number };
+      const data = (await res.json()) as {
+        products: number;
+        links: number;
+        clicks: number;
+        impressions: number;
+      };
       toast.success(
-        `Reset complete — ${data.products} products / ${data.links} links / ${data.clicks} clicks wiped`,
+        `Reset complete — ${data.products} products / ${data.links} links / ${data.clicks} clicks / ${data.impressions} impressions wiped`,
         { id: tid },
       );
       router.refresh();

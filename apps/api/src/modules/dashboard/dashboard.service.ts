@@ -16,6 +16,7 @@ export class DashboardService {
       totalProducts,
       totalCampaigns,
       activeCampaigns,
+      totalImpressions,
       byMarketplaceRows,
       byCampaignRows,
       last7,
@@ -27,6 +28,7 @@ export class DashboardService {
       this.prisma.campaign.count({
         where: { startAt: { lte: now }, endAt: { gte: now } },
       }),
+      this.prisma.impression.count(),
       this.prisma.$queryRaw<Array<{ marketplace: Marketplace; clicks: bigint }>>`
         SELECT l."marketplace" AS marketplace, COUNT(c.*) AS clicks
         FROM "Link" l
@@ -50,12 +52,16 @@ export class DashboardService {
       `,
     ]);
 
+    const ctr = totalImpressions > 0 ? totalClicks / totalImpressions : null;
+
     return {
       totalClicks,
       totalLinks,
       totalProducts,
       totalCampaigns,
       activeCampaigns,
+      totalImpressions,
+      ctr,
       byMarketplace: byMarketplaceRows.map((r) => ({
         marketplace: r.marketplace,
         clicks: Number(r.clicks),

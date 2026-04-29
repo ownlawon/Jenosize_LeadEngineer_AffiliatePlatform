@@ -75,8 +75,9 @@
 
 | Step | Action | Expected |
 |------|--------|---------|
-| 1 | Type just `yoga-mat-77` (no URL) into the form | Auto-detect fails because no marketplace can be inferred — error: "Could not detect marketplace from URL" |
-| 2 | Use the **Quick samples** buttons instead | Adds Yoga Mat product successfully |
+| 1 | With the marketplace selector on **Auto-detect**, type just `yoga-mat-77` (no URL) and submit | Inline amber warning hints the input looks like a SKU; submit returns "Could not detect marketplace from URL" toast (Auto can't pick a marketplace from a bare SKU) |
+| 2 | Switch the selector to **Lazada** and submit `yoga-mat-77` again | Row appears with a Lazada offer; same SKU + Shopee adds the Shopee offer to the same product |
+| 3 | Or use the **Quick samples** buttons instead | Adds the corresponding product successfully without typing |
 
 ### TC-2.4 · Best price flag is correct
 
@@ -122,7 +123,7 @@
 
 | Step | Action | Expected |
 |------|--------|---------|
-| 1 | `/admin/links` → choose Matcha, "Summer Deal 2025", LAZADA → **Generate** | Row appears with 8-char `shortCode`; `shortUrl` shown |
+| 1 | `/admin/links` → choose Matcha, "Summer Deal 2025", LAZADA → **Generate** | Row appears with 6-char `shortCode`; `shortUrl` shown |
 | 2 | Click **Copy** → paste into a new tab | Short URL opens in browser |
 
 ### TC-4.2 · Generate Shopee link for same product+campaign
@@ -176,7 +177,7 @@ Same as TC-5.3 but for Shopee.
 
 | Step | Action | Expected |
 |------|--------|---------|
-| 1 | Open `<api>/go/abcd1234` (random) | HTTP **404** "Link not found" |
+| 1 | Open `<api>/go/zz9zz9` (random 6 chars) | HTTP **404** "Link not found" |
 
 ### TC-5.6 · Open redirect protection
 
@@ -198,7 +199,7 @@ Click each generated short link 3–5 times across both marketplaces (or run the
 
 | Step | Action | Expected |
 |------|--------|---------|
-| 1 | Open `/admin/dashboard` | "Total clicks", "Total links", "Avg clicks / link", "Active campaigns" all show non-negative numbers; values match expectations |
+| 1 | Open `/admin/dashboard` | "Total clicks", "Total impressions", "CTR", "Active campaigns" all show non-negative values; CTR shows `—` when impressions are zero, otherwise a percentage like `5.2%` with the underlying `clicks / impressions` ratio in the hint line |
 
 ### TC-6.2 · By-marketplace breakdown
 
@@ -223,6 +224,16 @@ Click each generated short link 3–5 times across both marketplaces (or run the
 | Step | Action | Expected |
 |------|--------|---------|
 | 1 | Bar chart "Clicks last 7 days" | Today's bar > 0; previous days 0 (or non-zero if tested previously) |
+
+### TC-6.6 · Impression tracking + CTR
+
+| Step | Action | Expected |
+|------|--------|---------|
+| 1 | Open public campaign page `<web>/c/<id>` in a fresh private window | Product cards render |
+| 2 | Wait ~2 seconds for cards to be ≥50% visible (no scroll) | Network tab shows one `POST /api/impressions` request with the linkIds for visible cards; response 202 with `{ recorded: N }` |
+| 3 | Reload the same page in the same window | No new impression request fires (sessionStorage dedup blocks duplicates) |
+| 4 | Open admin dashboard | "Total impressions" reflects the count; "CTR" shows a percentage if any clicks have happened |
+| 5 | Inspect the request body | `{ linkIds: ['…', '…'] }` — capped at 50 IDs per call by DTO validation |
 
 ---
 
@@ -315,15 +326,15 @@ Click each generated short link 3–5 times across both marketplaces (or run the
 
 | Step | Action | Expected |
 |------|--------|---------|
-| 1 | Open https://github.com/ownlawon/Jenosize_LeadEngineer_AffiliatePlatform/actions | Latest workflow run = ✅ green |
+| 1 | Open https://github.com/ownlawon/Jenosize_LeadEngineer_AffiliatePlatform_NoppapadonT/actions | Latest workflow run = ✅ green |
 | 2 | Inspect run | Steps include: install, prisma generate + migrate, typecheck, unit tests, e2e tests, build |
 
 ### TC-10.3 · Tests
 
 | Step | Action | Expected |
 |------|--------|---------|
-| 1 | Locally: `pnpm install && pnpm -r build && pnpm -r test` | All workspace tests pass (12 unit) |
-| 2 | `pnpm --filter @jenosize/api test:e2e` (with Postgres + Redis up) | E2E redirect test passes |
+| 1 | Locally: `pnpm install && pnpm -r build && pnpm -r test` | All workspace tests pass (20 unit — 8 shopee adapter + 7 lazada adapter + 5 products) |
+| 2 | `pnpm --filter @jenosize/api test:e2e` (with Postgres + Redis up) | All 11 e2e cases pass (5 redirect + 6 auth/throttle) |
 
 ---
 
@@ -361,6 +372,7 @@ Copy into a sheet for execution:
 | TC-6.3  | By-campaign breakdown                    |  ☐   |       |
 | TC-6.4  | Top products leaderboard                 |  ☐   |       |
 | TC-6.5  | 7-day chart                              |  ☐   |       |
+| TC-6.6  | Impression tracking + CTR                |  ☐   |       |
 | TC-7.1  | Swagger UI                               |  ☐   |       |
 | TC-7.2  | Health endpoint                          |  ☐   |       |
 | TC-7.3  | Public endpoints                         |  ☐   |       |
@@ -374,4 +386,4 @@ Copy into a sheet for execution:
 | TC-10.3 | Tests pass locally                       |  ☐   |       |
 ```
 
-Total: **38 test cases** covering authentication, product/campaign/link management, public flow, click tracking, analytics, API documentation, security, cron, and repo/CI.
+Total: **39 test cases** covering authentication, product/campaign/link management, public flow, click tracking, impression tracking + CTR, analytics, API documentation, security, cron, and repo/CI.

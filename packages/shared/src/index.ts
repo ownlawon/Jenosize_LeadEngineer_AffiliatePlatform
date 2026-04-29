@@ -105,6 +105,10 @@ export interface DashboardSummary {
   totalCampaigns: number;
   /** Campaigns whose start/end range covers `now`; ≤ totalCampaigns. */
   activeCampaigns: number;
+  /** Total card-level views recorded by IntersectionObserver on the public landing. */
+  totalImpressions: number;
+  /** clicks / impressions, expressed as 0..1. `null` when no impressions yet (avoids divide-by-zero). */
+  ctr: number | null;
   byMarketplace: Array<{ marketplace: Marketplace; clicks: number }>;
   byCampaign: Array<{ campaignId: string; name: string; clicks: number }>;
   clicksLast7Days: Array<{ date: string; clicks: number }>;

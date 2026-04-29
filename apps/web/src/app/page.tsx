@@ -34,7 +34,7 @@ export default async function HomePage() {
               Open admin →
             </Link>
             <a
-              href="https://github.com/ownlawon/Jenosize_LeadEngineer_AffiliatePlatform"
+              href="https://github.com/ownlawon/Jenosize_LeadEngineer_AffiliatePlatform_NoppapadonT"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-outline"

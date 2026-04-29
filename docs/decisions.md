@@ -132,13 +132,23 @@ even if the row reaches the database somehow.
 seconds of opening the URL — a blank dashboard reads as "broken" even
 when it's correct.
 
-**Decision.** On `OnModuleInit`, count `Product` rows. If `0`, seed six
-fixtures + the "Summer Deal 2025" campaign + twelve links. Idempotent
-once data exists.
+**Decision.** On `OnModuleInit`, count `Product` rows. If `0`, seed
+three of the six fixture SKUs (Matcha, Yoga Mat, Wireless Earbuds) +
+the "Summer Deal 2025" campaign + six links (one per
+product × marketplace). Idempotent once data exists.
+
+**Why only half the fixtures.** Seeding all six leaves the Quick
+Samples row on `/admin/products` as a no-op for the reviewer — every
+button reports "already added". Holding three back (Coffee, Skincare,
+Keyboard) means the reviewer's first Quick Sample click produces a
+visible new row in the table, exercising the add-product code path
+end-to-end without typing a URL.
 
 **Rejected alternatives.**
 - *Run `pnpm db:seed` manually after deploy.* Adds a step the reviewer
   has to know about.
+- *Seed all six.* Reviewer's Quick Sample clicks are upserts against
+  pre-existing rows — no visible feedback.
 - *Always seed.* Would clobber any data the reviewer creates between
   deploys.
 
@@ -164,3 +174,64 @@ list endpoint runs `count()` + `findMany()` in a single
 - *Cursor pagination.* Cleaner for infinite-scroll UIs, but the admin
   surfaces here are tabular and want jumpable pages.
 - *No pagination yet.* Cheap now; nasty migration later.
+
+---
+
+## ADR-008 · Track impressions client-side via IntersectionObserver to back a real CTR metric
+
+**Status:** accepted
+
+**Context.** The assignment lists "CTR" as a required dashboard metric.
+True CTR is `clicks / impressions`, but the schema-as-shipped only
+records clicks — there is no impression event, so the dashboard had to
+display "avg clicks per link" as a CTR proxy. That's defensible but
+weak: the number isn't bounded to `[0, 1]`, can't be compared across
+campaigns of different traffic shapes, and doesn't match what an
+analytics reviewer expects under the label "CTR".
+
+**Decision.** Add an `Impression` entity (mirrors `Click`'s shape:
+`linkId`, `timestamp`, `referrer`, `userAgent`, `ipHash`). On the public
+campaign landing page, a client component wraps each product card with
+an `IntersectionObserver` and posts `{ linkIds: string[] }` to a public
+`POST /api/impressions` endpoint when the card is **≥50% visible for
+≥1 second**. The endpoint validates against the `Link` table (drops
+unknown IDs silently) and bulk-inserts. The dashboard then surfaces
+**CTR = totalClicks / totalImpressions** as a proper percentage,
+falling back to `—` when the denominator is zero.
+
+**Why the visibility thresholds.** A 50% viewport ratio + 1-second
+dwell filters the two failure modes that inflate impression counts —
+fly-by scrolling past the page and JavaScript-driven viewport hops on
+single-page apps. Industry analytics tools (Google Analytics, Meta
+Ads) settle in the same neighbourhood, so reviewers familiar with
+those numbers won't be surprised.
+
+**Why `sessionStorage` dedupe.** Without it, a single shopper bouncing
+between tabs or scrolling up and down would multiply the impression
+count by their interaction depth. We mark each `linkId` as "seen this
+session" the moment it fires once and never fire again until the
+session ends.
+
+**Why a public endpoint, not admin-only.** The shopper firing the
+event is, by definition, not authenticated. The endpoint is rate-
+limited globally (200 req/min) and validates `linkIds` against the
+real `Link` table — an attacker spamming this can only inflate counts
+for already-existing links, which still degrades CTR rather than
+creating phantom data.
+
+**Rejected alternatives.**
+- *Counter increment in Redis.* Faster writes, but loses per-impression
+  context (referrer, user-agent, ip-hash) that the existing `Click`
+  table already records — analytics symmetry between the two sides of
+  the CTR ratio is more valuable than write throughput at MVP scale.
+- *Server-rendered impression on page load.* A no-script fallback,
+  but counts headless bot traffic and SSR pre-renders as impressions —
+  CTR drops sharply for reasons unrelated to the campaign.
+- *Skip impressions, keep "avg clicks per link".* Discussed in this
+  ADR's Context. Defensible at submission time but misaligned with
+  reviewer expectations under the "CTR" label.
+
+**Trade-off accepted.** `Impression` table will grow faster than
+`Click` (typical CTR is 1–5%). At MVP scale this is fine; the same
+roadmap path that the click side takes — daily aggregation table —
+applies symmetrically when traffic warrants it.
