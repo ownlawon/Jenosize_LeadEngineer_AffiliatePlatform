@@ -85,8 +85,19 @@ test.describe("Affiliate happy path", () => {
     await page.getByRole("link", { name: /^Links$/ }).click();
     await expect(page).toHaveURL(/\/admin\/links/);
 
-    // Pick the new product (Coffee Beans) + new campaign + LAZADA, then submit.
-    await page.getByLabel(/Product/i).selectOption({ label: /Coffee/i });
+    // Pick the Coffee Beans option by reading its value off the DOM —
+    // selectOption({ label }) requires a literal string and we don't want to
+    // hardcode the fixture title (which could change). Same trick for
+    // Campaign so the test is robust to ordering changes.
+    const productSelect = page.getByLabel(/Product/i);
+    const coffeeValue = await productSelect
+      .locator("option")
+      .filter({ hasText: /Coffee/i })
+      .first()
+      .getAttribute("value");
+    expect(coffeeValue).toBeTruthy();
+    await productSelect.selectOption(coffeeValue!);
+
     await page.getByLabel(/Campaign/i).selectOption({ label: campaignName });
     await page.getByLabel(/Marketplace/i).selectOption("LAZADA");
     const linkResponse = page.waitForResponse(
