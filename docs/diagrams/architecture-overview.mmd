@@ -1,0 +1,37 @@
+flowchart LR
+  subgraph apps_web [apps/web · Next.js]
+    Public[Public pages /, /c/:id]
+    Admin[/admin/* · middleware-guarded/]
+    WebProxy[/api/* · proxy to api/]
+  end
+
+  subgraph apps_api [apps/api · NestJS]
+    Auth[AuthModule]
+    Products[ProductsModule]
+    Campaigns[CampaignsModule]
+    Links[LinksModule]
+    Redirect[RedirectModule]
+    Impressions[ImpressionsModule]
+    Dashboard[DashboardModule]
+    Jobs[JobsModule · cron]
+  end
+
+  Public -->|REST| Campaigns
+  Public -->|sendBeacon| Impressions
+  Admin -->|cookie auth| WebProxy
+  WebProxy -->|Bearer JWT| Auth
+  WebProxy --> Products
+  WebProxy --> Campaigns
+  WebProxy --> Links
+  WebProxy --> Dashboard
+
+  Products --> Adapters[(packages/adapters)]
+  Jobs --> Adapters
+  Auth --> Prisma[(Prisma · Postgres)]
+  Products --> Prisma
+  Campaigns --> Prisma
+  Links --> Prisma
+  Dashboard --> Prisma
+  Redirect --> Prisma
+  Impressions --> Prisma
+  Redirect --> Redis[(Redis cache)]

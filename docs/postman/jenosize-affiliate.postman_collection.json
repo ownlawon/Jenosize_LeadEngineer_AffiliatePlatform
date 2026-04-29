@@ -1,0 +1,348 @@
+{
+  "info": {
+    "name": "Jenosize Affiliate Platform",
+    "description": "Full REST surface — auth, products, campaigns, links, redirect, impressions, dashboard, admin. Run the **Login** request first; it stores the JWT in the `access_token` collection variable so subsequent admin-protected calls authorise automatically.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://jenosizeapi-production.up.railway.app",
+      "description": "API base URL — switch to http://localhost:3001 for local"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "description": "Set by the Login request"
+    },
+    { "key": "product_id", "value": "" },
+    { "key": "campaign_id", "value": "" },
+    { "key": "link_id", "value": "" },
+    { "key": "short_code", "value": "" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{access_token}}", "type": "string" }
+    ]
+  },
+  "item": [
+    {
+      "name": "Health",
+      "description": "Sanity check: pings DB + Redis. Run first; if this isn't 200 nothing else will work.",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": ["{{base_url}}"],
+          "path": ["health"]
+        }
+      }
+    },
+    {
+      "name": "Auth · Login (sets token)",
+      "description": "Logs in as the seeded admin and captures the access_token cookie + JSON token. The test script writes the JWT into the `access_token` collection variable.",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "content-type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin@jenosize.test\",\n  \"password\": \"ChangeMe!2025\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/auth/login",
+          "host": ["{{base_url}}"],
+          "path": ["api", "auth", "login"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const res = pm.response.json();",
+              "if (res.token) {",
+              "  pm.collectionVariables.set('access_token', res.token);",
+              "  console.log('access_token captured');",
+              "}",
+              "pm.test('200 OK', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth · Me",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/api/auth/me",
+          "host": ["{{base_url}}"],
+          "path": ["api", "auth", "me"]
+        }
+      }
+    },
+    {
+      "name": "Products · List",
+      "request": {
+        "method": "GET",
+        "auth": { "type": "noauth" },
+        "url": {
+          "raw": "{{base_url}}/api/products?page=1&pageSize=20",
+          "host": ["{{base_url}}"],
+          "path": ["api", "products"],
+          "query": [
+            { "key": "page", "value": "1" },
+            { "key": "pageSize", "value": "20" }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const res = pm.response.json();",
+              "if (res.items && res.items.length > 0) {",
+              "  pm.collectionVariables.set('product_id', res.items[0].id);",
+              "  console.log('product_id captured:', res.items[0].id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products · Create from URL",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "content-type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"url\": \"https://www.lazada.co.th/products/matcha-001.html\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/products",
+          "host": ["{{base_url}}"],
+          "path": ["api", "products"]
+        }
+      }
+    },
+    {
+      "name": "Products · Create from raw SKU",
+      "description": "Demonstrates the URL-or-SKU flow. When you pass a bare SKU you must specify `marketplace` so the right adapter is used.",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "content-type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"url\": \"matcha-001\",\n  \"marketplace\": \"LAZADA\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/products",
+          "host": ["{{base_url}}"],
+          "path": ["api", "products"]
+        }
+      }
+    },
+    {
+      "name": "Products · Get offers",
+      "request": {
+        "method": "GET",
+        "auth": { "type": "noauth" },
+        "url": {
+          "raw": "{{base_url}}/api/products/{{product_id}}/offers",
+          "host": ["{{base_url}}"],
+          "path": ["api", "products", "{{product_id}}", "offers"]
+        }
+      }
+    },
+    {
+      "name": "Campaigns · Create",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "content-type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Postman Test Campaign\",\n  \"utmCampaign\": \"postman_test\",\n  \"utmSource\": \"jenosize\",\n  \"utmMedium\": \"affiliate\",\n  \"startAt\": \"2026-01-01T00:00:00.000Z\",\n  \"endAt\": \"2026-12-31T23:59:59.000Z\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/campaigns",
+          "host": ["{{base_url}}"],
+          "path": ["api", "campaigns"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const res = pm.response.json();",
+              "if (res.id) {",
+              "  pm.collectionVariables.set('campaign_id', res.id);",
+              "  console.log('campaign_id captured');",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Campaigns · List",
+      "request": {
+        "method": "GET",
+        "auth": { "type": "noauth" },
+        "url": {
+          "raw": "{{base_url}}/api/campaigns",
+          "host": ["{{base_url}}"],
+          "path": ["api", "campaigns"]
+        }
+      }
+    },
+    {
+      "name": "Campaigns · Get with linked products",
+      "request": {
+        "method": "GET",
+        "auth": { "type": "noauth" },
+        "url": {
+          "raw": "{{base_url}}/api/campaigns/{{campaign_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "campaigns", "{{campaign_id}}"]
+        }
+      }
+    },
+    {
+      "name": "Links · Generate",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "content-type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"productId\": \"{{product_id}}\",\n  \"campaignId\": \"{{campaign_id}}\",\n  \"marketplace\": \"LAZADA\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/links",
+          "host": ["{{base_url}}"],
+          "path": ["api", "links"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const res = pm.response.json();",
+              "if (res.id) pm.collectionVariables.set('link_id', res.id);",
+              "if (res.shortCode) pm.collectionVariables.set('short_code', res.shortCode);",
+              "console.log('shortCode:', res.shortCode);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Links · List",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/api/links",
+          "host": ["{{base_url}}"],
+          "path": ["api", "links"]
+        }
+      }
+    },
+    {
+      "name": "Links · Per-link analytics",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/api/links/{{link_id}}/analytics",
+          "host": ["{{base_url}}"],
+          "path": ["api", "links", "{{link_id}}", "analytics"]
+        }
+      }
+    },
+    {
+      "name": "Redirect · /go/:code (don't follow!)",
+      "description": "Use the **Send** button → response should be 302 with a `Location` header containing utm_* params. If Postman auto-follows, disable 'Automatically follow redirects' in Settings.",
+      "request": {
+        "method": "GET",
+        "auth": { "type": "noauth" },
+        "url": {
+          "raw": "{{base_url}}/go/{{short_code}}",
+          "host": ["{{base_url}}"],
+          "path": ["go", "{{short_code}}"]
+        }
+      }
+    },
+    {
+      "name": "Impressions · Record batch (public)",
+      "description": "Public endpoint. Real shopper clients fire this via navigator.sendBeacon when product cards become visible.",
+      "request": {
+        "method": "POST",
+        "auth": { "type": "noauth" },
+        "header": [{ "key": "content-type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"linkIds\": [\"{{link_id}}\"]\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/impressions",
+          "host": ["{{base_url}}"],
+          "path": ["api", "impressions"]
+        }
+      }
+    },
+    {
+      "name": "Dashboard · Summary",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/api/dashboard",
+          "host": ["{{base_url}}"],
+          "path": ["api", "dashboard"]
+        }
+      }
+    },
+    {
+      "name": "Dashboard · Top products",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/api/dashboard/top-products?limit=5",
+          "host": ["{{base_url}}"],
+          "path": ["api", "dashboard", "top-products"],
+          "query": [{ "key": "limit", "value": "5" }]
+        }
+      }
+    },
+    {
+      "name": "Dashboard · Export clicks CSV",
+      "description": "Returns text/csv with Content-Disposition: attachment. In Postman the response body shows the CSV; click 'Save Response' to download.",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/api/dashboard/export/clicks.csv",
+          "host": ["{{base_url}}"],
+          "path": ["api", "dashboard", "export", "clicks.csv"]
+        }
+      }
+    },
+    {
+      "name": "Admin · Reset demo data",
+      "description": "Wipes all domain data and re-seeds 3 products + 1 campaign + 6 links. Useful between test runs.",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "{{base_url}}/api/admin/reset-demo",
+          "host": ["{{base_url}}"],
+          "path": ["api", "admin", "reset-demo"]
+        }
+      }
+    }
+  ]
+}

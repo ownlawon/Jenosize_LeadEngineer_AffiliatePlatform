@@ -6,6 +6,8 @@ This document expands on the [README architecture overview](../README.md#archite
 
 ## Data model (ER diagram)
 
+> Static PNG: [`diagrams/er-diagram.png`](diagrams/er-diagram.png)
+
 ```mermaid
 erDiagram
     USER {
@@ -145,6 +147,7 @@ sequenceDiagram
 ```
 
 **Why this design:**
+
 - Cache TTL is 5 min — short enough to pick up campaign UTM changes; long enough to amortize cold lookups.
 - Click insert is `setImmediate`-deferred: a slow DB write never blocks the user's redirect.
 - **Open-redirect defense**: even if a malicious targetUrl somehow landed in the DB, `appendUtm` rejects any host that isn't a Lazada/Shopee suffix.
@@ -202,16 +205,16 @@ If every box is ticked, the submission is functionally complete.
 
 ## Performance & scaling notes
 
-Numbers below are *design targets* for the redirect path — the only
+Numbers below are _design targets_ for the redirect path — the only
 end-user-facing latency-critical surface — assuming the deployed
 Railway sizing (shared 0.5 vCPU, ~512 MB).
 
-| Metric | Target | Why |
-|--------|--------|-----|
-| `/go/:code` p50 (warm cache) | **< 10 ms** | Single Redis `GET` + URL build |
-| `/go/:code` p95 | **< 30 ms** | Redis tail latency + Express overhead |
-| Cold cache (Redis miss) | **30–60 ms** | Adds Postgres `SELECT` + Redis `SET` |
-| Click insertion | **off-path** | `setImmediate` defers the row write |
+| Metric                           | Target       | Why                                    |
+| -------------------------------- | ------------ | -------------------------------------- |
+| `/go/:code` p50 (warm cache)     | **< 10 ms**  | Single Redis `GET` + URL build         |
+| `/go/:code` p95                  | **< 30 ms**  | Redis tail latency + Express overhead  |
+| Cold cache (Redis miss)          | **30–60 ms** | Adds Postgres `SELECT` + Redis `SET`   |
+| Click insertion                  | **off-path** | `setImmediate` defers the row write    |
 | Sustainable RPS (single replica) | **~500–800** | Bound by Redis `GET` + Node event loop |
 
 ### Why this layout earns the headroom
@@ -235,7 +238,7 @@ Railway sizing (shared 0.5 vCPU, ~512 MB).
   every redirect now costs a DB round-trip; p95 doubles. Mitigation:
   add Postgres read replica + LRU process cache as belt-and-braces.
 - **Click table grows.** At 10 M rows/month the dashboard's `GROUP
-  BY date_trunc('day', timestamp)` starts feeling its age.
+BY date_trunc('day', timestamp)` starts feeling its age.
   Mitigation: a daily aggregation job into a `ClickDaily` materialised
   table; the dashboard reads from there. Documented in the README's
   Future Roadmap.

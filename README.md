@@ -1,17 +1,19 @@
 # Jenosize Affiliate Platform
 
+> **Lead Engineer take-home · Jenosize Digital Opportunity Creator**
+> Lazada vs Shopee price comparison, per-campaign trackable short links, and a click-analytics dashboard with real CTR.
+
 [![CI](https://github.com/ownlawon/Jenosize_LeadEngineer_AffiliatePlatform_NoppapadonT/actions/workflows/ci.yml/badge.svg)](https://github.com/ownlawon/Jenosize_LeadEngineer_AffiliatePlatform_NoppapadonT/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/ownlawon/Jenosize_LeadEngineer_AffiliatePlatform_NoppapadonT/actions/workflows/codeql.yml/badge.svg)](https://github.com/ownlawon/Jenosize_LeadEngineer_AffiliatePlatform_NoppapadonT/actions/workflows/codeql.yml)
 ![Tests: 34](https://img.shields.io/badge/tests-34%20cases-2ea44f?logo=jest&logoColor=white)
+![ADRs: 8](https://img.shields.io/badge/ADRs-8-blueviolet)
 [![License: MIT](https://img.shields.io/badge/license-MIT-slategray.svg)](LICENSE)
 ![Node ≥20](https://img.shields.io/badge/node-%E2%89%A520-339933?logo=node.js&logoColor=white)
 ![pnpm 9](https://img.shields.io/badge/pnpm-9-F69220?logo=pnpm&logoColor=white)
 
-> **Test Assignment — Software Engineer (Lead Engineer) · Jenosize**
->
-> Affiliate web app that compares prices between **Lazada** and **Shopee**, generates trackable affiliate short links per campaign, and shows click analytics on an admin dashboard.
+**Quickstart:** [open the demo](https://jenosizeweb-production.up.railway.app) · login `admin@jenosize.test` / `ChangeMe!2025` · "Reset demo data" puts the catalogue back to a clean state · Swagger at [`/api/docs`](https://jenosizeapi-production.up.railway.app/api/docs).
 
-**Reading order for reviewers:** [`docs/decisions.md`](docs/decisions.md) (8 ADRs · the _why_) → [`docs/architecture.md`](docs/architecture.md) (diagrams + perf) → [`docs/api-recipes.md`](docs/api-recipes.md) (cURL playbook) → [`docs/UAT.md`](docs/UAT.md) (39 acceptance cases).
+**Reading order for reviewers:** [`docs/decisions.md`](docs/decisions.md) (8 ADRs · the _why_) → [`docs/architecture.md`](docs/architecture.md) (diagrams + perf) → [`docs/api-recipes.md`](docs/api-recipes.md) (cURL playbook) → [`docs/UAT.md`](docs/UAT.md) (39 acceptance cases) → [`docs/perf/`](docs/perf/) (Lighthouse + a11y notes).
 
 ## Demo
 
@@ -31,6 +33,11 @@
 ---
 
 ## Architecture
+
+![Architecture overview](docs/diagrams/architecture-overview.png)
+
+<details>
+<summary>ASCII fallback (renders on text-only viewers)</summary>
 
 ```
 ┌─────────────────────────┐         ┌─────────────────────────┐
@@ -58,6 +65,8 @@
    └──────────────────────┘
 ```
 
+</details>
+
 ```mermaid
 sequenceDiagram
     autonumber
@@ -83,6 +92,8 @@ sequenceDiagram
       U->>M: follows redirect
     end
 ```
+
+> Static PNG fallbacks for both diagrams live in [`docs/diagrams/`](docs/diagrams/) — useful when GitHub's Mermaid renderer struggles on mobile.
 
 ### Why this layout
 
@@ -166,7 +177,18 @@ Open:
 ```bash
 pnpm test                          # unit
 pnpm --filter @jenosize/api test:e2e   # e2e (needs Postgres up)
+pnpm --filter @jenosize/web e2e        # Playwright happy path (needs api+db+redis up)
 ```
+
+### Test the API with Postman
+
+Import [`docs/postman/jenosize-affiliate.postman_collection.json`](docs/postman/jenosize-affiliate.postman_collection.json) into Postman:
+
+1. **Import** → drop the JSON file
+2. Run the **Auth · Login** request first — its test script captures the JWT into the collection variable so subsequent admin calls authenticate automatically
+3. Disable "Automatically follow redirects" in Postman Settings if you want to inspect the `/go/:code` 302 response
+
+The collection covers all 13+ endpoints with sample bodies and chains variables (`product_id`, `campaign_id`, `link_id`, `short_code`) between requests.
 
 ---
 

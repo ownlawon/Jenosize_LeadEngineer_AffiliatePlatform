@@ -1,0 +1,27 @@
+sequenceDiagram
+    autonumber
+    participant U as Browser
+    participant W as apps/web
+    participant N as Next rewrite
+    participant A as apps/api · RedirectController
+    participant S as RedirectService
+    participant R as Redis
+    participant D as Postgres
+    participant M as Lazada/Shopee
+
+    U->>W: GET /go/abc123
+    W->>N: matches rewrites()
+    N->>A: GET /go/abc123
+    A->>S: resolveAndTrack(code, meta)
+    S->>R: GET link:abc123
+    alt cache miss
+        S->>D: SELECT link + campaign
+        S->>R: SET link:abc123 (TTL 300s)
+    end
+    S-->>A: target URL + UTMs appended
+    A-->>U: 302 Location: marketplace URL
+    par fire-and-forget click insert
+        S->>D: INSERT INTO Click
+    and
+        U->>M: follows 302
+    end
