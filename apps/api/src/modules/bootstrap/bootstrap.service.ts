@@ -1,11 +1,12 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { Marketplace, Prisma } from '@prisma/client';
-import { customAlphabet } from 'nanoid';
+import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
+import { Marketplace, Prisma } from "@prisma/client";
+import { customAlphabet } from "nanoid";
 
-import { getAdapter } from '@jenosize/adapters';
-import { PrismaService } from '../../prisma/prisma.service';
+import { getAdapter } from "@jenosize/adapters";
+import { PrismaService } from "../../prisma/prisma.service";
 
-const SHORT_CODE_ALPHABET = 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const SHORT_CODE_ALPHABET =
+  "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const generateShortCode = customAlphabet(SHORT_CODE_ALPHABET, 6);
 
 /**
@@ -20,11 +21,7 @@ const generateShortCode = customAlphabet(SHORT_CODE_ALPHABET, 6);
  * The other three SKUs still ship in packages/adapters fixtures and the
  * Quick Sample buttons; they're just not seeded by default.
  */
-const SEED_EXTERNAL_IDS = [
-  'matcha-001',
-  'yoga-mat-77',
-  'wireless-earbuds-x9',
-];
+const SEED_EXTERNAL_IDS = ["matcha-001", "yoga-mat-77", "wireless-earbuds-x9"];
 
 /**
  * One-shot demo seeder. Runs on every container start, but only writes if the
@@ -42,11 +39,13 @@ export class BootstrapService implements OnModuleInit {
   async onModuleInit() {
     const productCount = await this.prisma.product.count();
     if (productCount > 0) {
-      this.log.log(`Skipping demo seed — found ${productCount} existing products`);
+      this.log.log(
+        `Skipping demo seed — found ${productCount} existing products`,
+      );
       return;
     }
 
-    this.log.log('Empty catalogue detected — seeding demo data');
+    this.log.log("Empty catalogue detected — seeding demo data");
     await this.seedAll();
   }
 
@@ -62,10 +61,15 @@ export class BootstrapService implements OnModuleInit {
     clicks: number;
     impressions: number;
   }> {
-    this.log.warn('Resetting demo data — wiping clicks/impressions/links/campaigns/offers/products');
-    // Order matters: respect FK chain — (Click, Impression) → Link → (Campaign, Offer) → Product
+    this.log.warn(
+      "Resetting demo data — wiping clicks/impressions/aggregations/links/campaigns/offers/products",
+    );
+    // Order matters: respect FK chain — (Click, Impression) → Link → (Campaign, Offer) → Product.
+    // Daily aggregations have no FK so they can be wiped any time.
     const wipedClicks = await this.prisma.click.deleteMany();
     const wipedImpressions = await this.prisma.impression.deleteMany();
+    await this.prisma.clickDaily.deleteMany();
+    await this.prisma.impressionDaily.deleteMany();
     const wipedLinks = await this.prisma.link.deleteMany();
     await this.prisma.campaign.deleteMany();
     await this.prisma.offer.deleteMany();
@@ -95,15 +99,18 @@ export class BootstrapService implements OnModuleInit {
   private async seedProductsAndOffers(): Promise<string[]> {
     const ids: string[] = [];
     for (const externalId of SEED_EXTERNAL_IDS) {
-      const lazada = await this.upsertProductWithOffer(externalId, 'LAZADA');
-      const shopee = await this.upsertProductWithOffer(externalId, 'SHOPEE');
+      const lazada = await this.upsertProductWithOffer(externalId, "LAZADA");
+      const shopee = await this.upsertProductWithOffer(externalId, "SHOPEE");
       // Same title across marketplaces → upsert merged into one product row.
       if (lazada.id === shopee.id) ids.push(lazada.id);
     }
     return ids;
   }
 
-  private async upsertProductWithOffer(externalId: string, marketplace: Marketplace) {
+  private async upsertProductWithOffer(
+    externalId: string,
+    marketplace: Marketplace,
+  ) {
     const adapter = getAdapter(marketplace);
     const fetched = await adapter.fetchProduct(externalId);
 
@@ -112,7 +119,7 @@ export class BootstrapService implements OnModuleInit {
     });
 
     const product = await this.prisma.product.upsert({
-      where: { id: existingByTitle?.id ?? '__none__' },
+      where: { id: existingByTitle?.id ?? "__none__" },
       update: {},
       create: { title: fetched.title, imageUrl: fetched.imageUrl },
     });
@@ -143,33 +150,40 @@ export class BootstrapService implements OnModuleInit {
 
   private async seedSummerCampaign(): Promise<string> {
     const existing = await this.prisma.campaign.findFirst({
-      where: { name: 'Summer Deal 2025' },
+      where: { name: "Summer Deal 2025" },
     });
     if (existing) return existing.id;
     const c = await this.prisma.campaign.create({
       data: {
-        name: 'Summer Deal 2025',
-        utmCampaign: 'summer_deal_2025',
-        utmSource: 'jenosize',
-        utmMedium: 'affiliate',
-        startAt: new Date('2025-06-01T00:00:00.000Z'),
-        endAt: new Date('2026-12-31T23:59:59.000Z'),
+        name: "Summer Deal 2025",
+        utmCampaign: "summer_deal_2025",
+        utmSource: "jenosize",
+        utmMedium: "affiliate",
+        startAt: new Date("2025-06-01T00:00:00.000Z"),
+        endAt: new Date("2026-12-31T23:59:59.000Z"),
       },
     });
     return c.id;
   }
 
-  private async seedLinks(productIds: string[], campaignId: string): Promise<number> {
+  private async seedLinks(
+    productIds: string[],
+    campaignId: string,
+  ): Promise<number> {
     let created = 0;
     for (const productId of productIds) {
-      for (const marketplace of ['LAZADA', 'SHOPEE'] as const) {
+      for (const marketplace of ["LAZADA", "SHOPEE"] as const) {
         const offer = await this.prisma.offer.findUnique({
           where: { productId_marketplace: { productId, marketplace } },
         });
         if (!offer) continue;
         const existing = await this.prisma.link.findUnique({
           where: {
-            productId_campaignId_marketplace: { productId, campaignId, marketplace },
+            productId_campaignId_marketplace: {
+              productId,
+              campaignId,
+              marketplace,
+            },
           },
         });
         if (existing) continue;

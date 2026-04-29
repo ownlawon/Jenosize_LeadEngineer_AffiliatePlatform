@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { ScheduleModule } from "@nestjs/schedule";
-import { ThrottlerModule, ThrottlerGuard } from "@nestjs/throttler";
+import { ThrottlerModule } from "@nestjs/throttler";
 import { APP_GUARD } from "@nestjs/core";
 import { LoggerModule } from "nestjs-pino";
 import { randomUUID } from "crypto";
@@ -9,11 +9,13 @@ import type { IncomingMessage, ServerResponse } from "http";
 
 import { PrismaModule } from "./prisma/prisma.module";
 import { RedisModule } from "./redis/redis.module";
+import { ThrottlerByUserGuard } from "./common/throttler-by-user.guard";
 import { AuthModule } from "./modules/auth/auth.module";
 import { ProductsModule } from "./modules/products/products.module";
 import { CampaignsModule } from "./modules/campaigns/campaigns.module";
 import { LinksModule } from "./modules/links/links.module";
 import { ImpressionsModule } from "./modules/impressions/impressions.module";
+import { WebhooksModule } from "./modules/webhooks/webhooks.module";
 import { RedirectModule } from "./modules/redirect/redirect.module";
 import { DashboardModule } from "./modules/dashboard/dashboard.module";
 import { JobsModule } from "./modules/jobs/jobs.module";
@@ -73,6 +75,7 @@ const isDev = process.env.NODE_ENV !== "production";
     CampaignsModule,
     LinksModule,
     ImpressionsModule,
+    WebhooksModule,
     RedirectModule,
     DashboardModule,
     JobsModule,
@@ -80,6 +83,6 @@ const isDev = process.env.NODE_ENV !== "production";
     AdminModule,
   ],
   controllers: [HealthController],
-  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
+  providers: [{ provide: APP_GUARD, useClass: ThrottlerByUserGuard }],
 })
 export class AppModule {}

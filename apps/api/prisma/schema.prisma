@@ -100,3 +100,24 @@ model Impression {
   @@index([linkId, timestamp])
   @@index([timestamp])
 }
+
+/// Closed-day aggregation of Click rows. Filled by DailyAggregationJob; the
+/// dashboard's 7-day chart reads from here for closed days and from Click
+/// for the current day. ADR-009 covers the rationale.
+model ClickDaily {
+  date  DateTime @db.Date
+  count Int
+
+  @@unique([date])
+  @@index([date])
+}
+
+/// Closed-day aggregation of Impression rows; mirror of ClickDaily so the
+/// CTR over time plot can be served without scanning raw Impression.
+model ImpressionDaily {
+  date  DateTime @db.Date
+  count Int
+
+  @@unique([date])
+  @@index([date])
+}

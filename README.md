@@ -6,14 +6,14 @@
 [![CI](https://github.com/ownlawon/Jenosize_LeadEngineer_AffiliatePlatform_NoppapadonT/actions/workflows/ci.yml/badge.svg)](https://github.com/ownlawon/Jenosize_LeadEngineer_AffiliatePlatform_NoppapadonT/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/ownlawon/Jenosize_LeadEngineer_AffiliatePlatform_NoppapadonT/actions/workflows/codeql.yml/badge.svg)](https://github.com/ownlawon/Jenosize_LeadEngineer_AffiliatePlatform_NoppapadonT/actions/workflows/codeql.yml)
 ![Tests: 34](https://img.shields.io/badge/tests-34%20cases-2ea44f?logo=jest&logoColor=white)
-![ADRs: 8](https://img.shields.io/badge/ADRs-8-blueviolet)
+![ADRs: 9](https://img.shields.io/badge/ADRs-9-blueviolet)
 [![License: MIT](https://img.shields.io/badge/license-MIT-slategray.svg)](LICENSE)
 ![Node ≥20](https://img.shields.io/badge/node-%E2%89%A520-339933?logo=node.js&logoColor=white)
 ![pnpm 9](https://img.shields.io/badge/pnpm-9-F69220?logo=pnpm&logoColor=white)
 
 **Quickstart:** [open the demo](https://jenosizeweb-production.up.railway.app) · login `admin@jenosize.test` / `ChangeMe!2025` · "Reset demo data" puts the catalogue back to a clean state · Swagger at [`/api/docs`](https://jenosizeapi-production.up.railway.app/api/docs).
 
-**Reading order for reviewers:** [`docs/decisions.md`](docs/decisions.md) (8 ADRs · the _why_) → [`docs/architecture.md`](docs/architecture.md) (diagrams + perf) → [`docs/api-recipes.md`](docs/api-recipes.md) (cURL playbook) → [`docs/UAT.md`](docs/UAT.md) (39 acceptance cases) → [`docs/perf/`](docs/perf/) (Lighthouse + a11y notes).
+**Reading order for reviewers:** [`docs/decisions.md`](docs/decisions.md) (9 ADRs · the _why_) → [`docs/architecture.md`](docs/architecture.md) (diagrams + perf) → [`docs/api-recipes.md`](docs/api-recipes.md) (cURL playbook) → [`docs/UAT.md`](docs/UAT.md) (39 acceptance cases) → [`docs/perf/`](docs/perf/) (Lighthouse, a11y, k6 load test).
 
 ## Demo
 
@@ -218,23 +218,27 @@ Best-price flag is computed in `ProductsService.markBestPrice()` — pure functi
 
 Full schemas live in **Swagger UI** at `/api/docs`. Highlights:
 
-| Method | Path                          | Auth | Description                                                                                                                      |
-| ------ | ----------------------------- | ---- | -------------------------------------------------------------------------------------------------------------------------------- |
-| POST   | `/api/auth/login`             | —    | Sets httpOnly `access_token` cookie                                                                                              |
-| POST   | `/api/auth/logout`            | —    | Clears cookie                                                                                                                    |
-| GET    | `/api/auth/me`                | JWT  | Current user                                                                                                                     |
-| POST   | `/api/products`               | JWT  | Add product from URL or raw SKU; marketplace auto-detected from URL host, or passed explicitly when posting a bare SKU           |
-| GET    | `/api/products`               | —    | List with offers + best-price flag                                                                                               |
-| GET    | `/api/products/:id/offers`    | —    | Offers for one product                                                                                                           |
-| POST   | `/api/campaigns`              | JWT  | Create campaign with UTM                                                                                                         |
-| GET    | `/api/campaigns`              | —    | List (used by public landing)                                                                                                    |
-| GET    | `/api/campaigns/:id`          | —    | With linked products + offers                                                                                                    |
-| POST   | `/api/links`                  | JWT  | Generate short link for product · campaign · marketplace                                                                         |
-| GET    | `/api/links`                  | JWT  | List links with click counts                                                                                                     |
-| GET    | `/go/:code`                   | —    | **302** redirect to marketplace URL with UTMs appended; logs Click                                                               |
-| POST   | `/api/impressions`            | —    | Public batch endpoint (`{ linkIds: string[] }`) called by the landing page when product cards become visible. Backs the CTR KPI. |
-| GET    | `/api/dashboard`              | JWT  | Totals + by-marketplace + by-campaign + last 7 days + **CTR** (clicks ÷ impressions)                                             |
-| GET    | `/api/dashboard/top-products` | JWT  | Leaderboard by clicks                                                                                                            |
+| Method | Path                               | Auth | Description                                                                                                                      |
+| ------ | ---------------------------------- | ---- | -------------------------------------------------------------------------------------------------------------------------------- |
+| POST   | `/api/auth/login`                  | —    | Sets httpOnly `access_token` cookie                                                                                              |
+| POST   | `/api/auth/logout`                 | —    | Clears cookie                                                                                                                    |
+| GET    | `/api/auth/me`                     | JWT  | Current user                                                                                                                     |
+| POST   | `/api/products`                    | JWT  | Add product from URL or raw SKU; marketplace auto-detected from URL host, or passed explicitly when posting a bare SKU           |
+| GET    | `/api/products`                    | —    | List with offers + best-price flag                                                                                               |
+| GET    | `/api/products/:id/offers`         | —    | Offers for one product                                                                                                           |
+| POST   | `/api/campaigns`                   | JWT  | Create campaign with UTM                                                                                                         |
+| GET    | `/api/campaigns`                   | —    | List (used by public landing)                                                                                                    |
+| GET    | `/api/campaigns/:id`               | —    | With linked products + offers                                                                                                    |
+| POST   | `/api/links`                       | JWT  | Generate short link for product · campaign · marketplace                                                                         |
+| GET    | `/api/links`                       | JWT  | List links with click counts                                                                                                     |
+| GET    | `/go/:code`                        | —    | **302** redirect to marketplace URL with UTMs appended; logs Click                                                               |
+| POST   | `/api/impressions`                 | —    | Public batch endpoint (`{ linkIds: string[] }`) called by the landing page when product cards become visible. Backs the CTR KPI. |
+| GET    | `/api/dashboard`                   | JWT  | Totals + by-marketplace + by-campaign + last 7 days + **CTR** (clicks ÷ impressions)                                             |
+| GET    | `/api/dashboard/top-products`      | JWT  | Leaderboard by clicks                                                                                                            |
+| GET    | `/api/dashboard/export/clicks.csv` | JWT  | Click rows joined with product+campaign as RFC 4180 CSV (?from=&to=, capped at 1 year)                                           |
+| GET    | `/api/links/:id/analytics`         | JWT  | Per-link drill-down — clicks, impressions, CTR, last 7 days                                                                      |
+| POST   | `/api/webhooks/lazada`             | HMAC | Marketplace price-update webhook; `X-Signature: sha256=<hex>` verified against `LAZADA_WEBHOOK_SECRET`                           |
+| POST   | `/api/webhooks/shopee`             | HMAC | Same shape, signed with `SHOPEE_WEBHOOK_SECRET`                                                                                  |
 
 ---
 

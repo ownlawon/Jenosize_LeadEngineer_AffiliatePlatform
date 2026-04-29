@@ -24,9 +24,10 @@ real contract; replacing the mock with a live HTTP client is a one-file
 swap that touches nothing in the api or web app.
 
 **Rejected alternatives.**
-- *Live API integration.* Blocked on approval lead-time outside the 3–5
+
+- _Live API integration._ Blocked on approval lead-time outside the 3–5
   day delivery window.
-- *Headless-browser scraping.* Fragile, expensive to run, and would
+- _Headless-browser scraping._ Fragile, expensive to run, and would
   invite bot-detection issues during a public demo.
 
 **Reviewer signal.** The `pluggable adapter` pattern is the architecture
@@ -36,7 +37,7 @@ implementations doesn't require api changes.
 
 ---
 
-## ADR-002 · pnpm workspace monorepo (apps/* + packages/*)
+## ADR-002 · pnpm workspace monorepo (apps/_ + packages/_)
 
 **Status:** accepted
 
@@ -49,9 +50,10 @@ independently deployable; `packages/shared` (Zod schemas + DTO types)
 and `packages/adapters` are workspace dependencies.
 
 **Rejected alternatives.**
-- *Two separate repos with shared types via npm.* Adds publish/version
+
+- _Two separate repos with shared types via npm._ Adds publish/version
   ceremony for what amounts to a single product.
-- *Single Next.js app with route handlers.* Hides the api/frontend
+- _Single Next.js app with route handlers._ Hides the api/frontend
   boundary the assignment explicitly asks to demonstrate.
 
 ---
@@ -71,9 +73,10 @@ insertion is `setImmediate`-deferred so the 302 response is never
 gated on a database write.
 
 **Rejected alternatives.**
-- *Process-local LRU cache.* Doesn't survive a deploy or scale across
+
+- _Process-local LRU cache._ Doesn't survive a deploy or scale across
   multiple replicas.
-- *No cache, lean on Postgres.* Adds ~5ms p95 to every redirect for
+- _No cache, lean on Postgres._ Adds ~5ms p95 to every redirect for
   no good reason once link → target is essentially immutable.
 
 **Trade-off accepted.** A campaign UTM change takes up to 5 minutes to
@@ -97,9 +100,10 @@ handlers (`/api/login`, `/api/logout`, `/api/admin/*`) proxy the
 request to the api with `Authorization: Bearer <cookie>`.
 
 **Rejected alternatives.**
-- *Token in Authorization header from the client.* Forces the token
+
+- _Token in Authorization header from the client._ Forces the token
   into JS; weaker XSS posture.
-- *Server session table.* Heavier; needs cleanup; we already pay for
+- _Server session table._ Heavier; needs cleanup; we already pay for
   Postgres but don't need that round-trip on every authed request.
 
 ---
@@ -117,7 +121,8 @@ whose host isn't a suffix of `lazada.co.th`, `lazada.com`,
 even if the row reaches the database somehow.
 
 **Rejected alternatives.**
-- *Trust the database.* The `Link.targetUrl` is populated from
+
+- _Trust the database._ The `Link.targetUrl` is populated from
   `Offer.externalUrl`, which is populated from the adapter's
   `MarketplaceProduct.url`. If an adapter is ever compromised, the
   whitelist is the second line of defense.
@@ -145,11 +150,12 @@ visible new row in the table, exercising the add-product code path
 end-to-end without typing a URL.
 
 **Rejected alternatives.**
-- *Run `pnpm db:seed` manually after deploy.* Adds a step the reviewer
+
+- _Run `pnpm db:seed` manually after deploy._ Adds a step the reviewer
   has to know about.
-- *Seed all six.* Reviewer's Quick Sample clicks are upserts against
+- _Seed all six._ Reviewer's Quick Sample clicks are upserts against
   pre-existing rows — no visible feedback.
-- *Always seed.* Would clobber any data the reviewer creates between
+- _Always seed._ Would clobber any data the reviewer creates between
   deploys.
 
 **Mirror.** The same pipeline is exposed at `POST /api/admin/reset-demo`
@@ -171,9 +177,10 @@ list endpoint runs `count()` + `findMany()` in a single
 `$transaction` so the total is consistent with the page.
 
 **Rejected alternatives.**
-- *Cursor pagination.* Cleaner for infinite-scroll UIs, but the admin
+
+- _Cursor pagination._ Cleaner for infinite-scroll UIs, but the admin
   surfaces here are tabular and want jumpable pages.
-- *No pagination yet.* Cheap now; nasty migration later.
+- _No pagination yet._ Cheap now; nasty migration later.
 
 ---
 
@@ -220,14 +227,15 @@ for already-existing links, which still degrades CTR rather than
 creating phantom data.
 
 **Rejected alternatives.**
-- *Counter increment in Redis.* Faster writes, but loses per-impression
+
+- _Counter increment in Redis._ Faster writes, but loses per-impression
   context (referrer, user-agent, ip-hash) that the existing `Click`
   table already records — analytics symmetry between the two sides of
   the CTR ratio is more valuable than write throughput at MVP scale.
-- *Server-rendered impression on page load.* A no-script fallback,
+- _Server-rendered impression on page load._ A no-script fallback,
   but counts headless bot traffic and SSR pre-renders as impressions —
   CTR drops sharply for reasons unrelated to the campaign.
-- *Skip impressions, keep "avg clicks per link".* Discussed in this
+- _Skip impressions, keep "avg clicks per link"._ Discussed in this
   ADR's Context. Defensible at submission time but misaligned with
   reviewer expectations under the "CTR" label.
 
@@ -235,3 +243,60 @@ creating phantom data.
 `Click` (typical CTR is 1–5%). At MVP scale this is fine; the same
 roadmap path that the click side takes — daily aggregation table —
 applies symmetrically when traffic warrants it.
+
+---
+
+## ADR-009 · Pre-compute daily click + impression aggregates
+
+**Status:** accepted
+
+**Context.** The dashboard's 7-day chart and the per-link drill-down
+both run `GROUP BY date_trunc('day', timestamp)` over `Click` /
+`Impression`. At MVP scale this is fast (10s of rows). Once a single
+campaign produces 100k impressions a day, full table scans on every
+dashboard load become the slow query in the system.
+
+**Decision.** Add `ClickDaily(date, count)` and
+`ImpressionDaily(date, count)` aggregation tables, populated by
+`DailyAggregationJob` running at 00:05 UTC. The cron upserts on
+`(date)` so re-running the job (e.g., after a deploy that bounced the
+container) is idempotent. Job is exported from `JobsModule` so a
+future CLI / admin trigger can backfill historical days.
+
+**Why now if scale doesn't warrant it yet.** Two reasons:
+
+1. **The cost of starting late is high** — when the Click table is
+   100k rows and slow, you're already in pain. Adding the aggregation
+   then requires writing the migration + cron + dashboard rewrite
+   under pressure, then backfilling N days of history. Adding it now
+   when the tables are tiny is a 60-line job.
+2. **It's a maintainable design pattern** — the aggregation lives in
+   `apps/api/src/modules/jobs/` next to `PriceRefreshJob`, follows the
+   same `@Cron` shape, no new framework or service.
+
+**Decision (deferred): the dashboard read switch.** The dashboard
+still queries `Click` and `Impression` directly today. The aggregation
+tables are populated proactively but unread. Switching the dashboard
+to read from `ClickDaily` for closed days + `Click` for today is the
+follow-up that delivers the latency win — it's a 20-line change in
+`DashboardService` once the team decides the volume warrants it.
+
+**Rejected alternatives.**
+
+- _Materialised view._ Postgres `MATERIALIZED VIEW` with `REFRESH
+CONCURRENTLY` is the database-native version of this. Two reasons
+  not to: (a) Prisma doesn't model materialised views idiomatically
+  yet, breaking the `prisma migrate` round-trip; (b) refresh cost is
+  proportional to the _whole table_, not just yesterday's rows.
+- _Compute on read with cache._ Redis-cached aggregations work but
+  invalidation gets messy — a click 2 days ago retroactively
+  changing the count would mean cache-busting heuristics. The cron
+  pattern doesn't have this problem.
+- _Skip._ Possible at MVP scale, but the engineering cost of doing
+  it now (~1 hour) is far below the cost of doing it later under
+  performance pressure.
+
+**Trade-off accepted.** Storage is 365 rows/year/table — negligible.
+The job runs once a day in <1s for any realistic volume. Eventually
+consistent with the raw tables (worst case: yesterday's count is
+stale by a few seconds at midnight UTC) — acceptable for analytics.

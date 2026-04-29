@@ -1,9 +1,16 @@
+// MUST be the first import: OpenTelemetry's auto-instrumentations patch
+// http/express/pg/ioredis modules at require-time. If any module above
+// loads them first, those call sites won't be traced.
+import "./common/tracing";
+
 import { NestFactory } from "@nestjs/core";
+import { NestExpressApplication } from "@nestjs/platform-express";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { ValidationPipe } from "@nestjs/common";
 import { Logger as PinoLogger } from "nestjs-pino";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
+import { json, type Request as ExpressRequest } from "express";
 import { AppModule } from "./app.module";
 
 async function bootstrap() {
@@ -14,7 +21,7 @@ async function bootstrap() {
     "http://localhost:3000",
   ].filter((v): v is string => Boolean(v));
 
-  const app = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bufferLogs: true,
     cors: {
       origin: (origin, cb) => {
@@ -56,6 +63,18 @@ async function bootstrap() {
     }),
   );
   app.use(cookieParser());
+
+  // Capture the raw JSON body for HMAC verification on /api/webhooks/*
+  // (after parsing, the original byte string is gone — but signatures sign
+  // exactly those bytes). The verify callback fires before route handling.
+  app.use(
+    json({
+      verify: (req, _res, buf: Buffer) => {
+        (req as ExpressRequest & { rawBody?: string }).rawBody =
+          buf.toString("utf8");
+      },
+    }),
+  );
 
   app.useGlobalPipes(
     new ValidationPipe({
